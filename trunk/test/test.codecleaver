@@ -1,0 +1,63 @@
+# Script to test basic codecleaver operations
+#
+# TODO(peterhal): need more exhaustive tests
+
+# display help topics
+help
+
+# display help for a command
+help list
+
+# display help for an aliased operator
+help +
+
+# display complete help docs
+help all
+
+# open a jar file and assign it to the Guava variable
+openAssign Guava lib/guava-r06/guava-r06.jar
+
+# the special list operations
+listSets
+listOpenFiles
+listSymbolFiles
+
+# simple list
+list TransientFields
+
+# the info command
+info com/google/common/collect/Synchronized
+
+# some expression tests
+# TODO(peterhal): need more exhaustive expression tests
+TransientFields ^ com/google/common/collect/Synchronized
+TS = com/google/common/collect/Synchronized ^ Types
+TS
+TS ^ Finals
+Synchronized = TS ^ Finals
+!Synchronized
+size !*Synchronized
+size (Synchronized + !Synchronized + !!Synchronized + !!!Synchronized + !!!!Synchronized)
+size !Synchronized
+!!!!Synchronized
+
+<com/google/common/collect/Synchronized$SynchronizedAsMapEntries$1$1.<init>.(Lcom/google/common/collect/Synchronized$SynchronizedAsMapEntries$1;Ljava/util/Map$Entry;)V
+>com/google/common/collect/Synchronized$SynchronizedAsMapEntries$1$1.<init>.(Lcom/google/common/collect/Synchronized$SynchronizedAsMapEntries$1;Ljava/util/Map$Entry;)V
+size >* com/google/common/collect/Synchronized$SynchronizedAsMapEntries$1$1.<init>.(Lcom/google/common/collect/Synchronized$SynchronizedAsMapEntries$1;Ljava/util/Map$Entry;)V
+size > com/google/common/collect/Synchronized$SynchronizedAsMapEntries$1$1.<init>.(Lcom/google/common/collect/Synchronized$SynchronizedAsMapEntries$1;Ljava/util/Map$Entry;)V
+>* com/google/common/collect/Synchronized$SynchronizedAsMapEntries$1$1.<init>.(Lcom/google/common/collect/Synchronized$SynchronizedAsMapEntries$1;Ljava/util/Map$Entry;)V
+> com/google/common/collect/Synchronized$SynchronizedAsMapEntries$1$1.<init>.(Lcom/google/common/collect/Synchronized$SynchronizedAsMapEntries$1;Ljava/util/Map$Entry;)V
+< com/google/common/collect/Synchronized$SynchronizedAsMapEntries$1$1.<init>.(Lcom/google/common/collect/Synchronized$SynchronizedAsMapEntries$1;Ljava/util/Map$Entry;)V
+size <* com/google/common/collect/Synchronized$SynchronizedAsMapEntries$1$1.<init>.(Lcom/google/common/collect/Synchronized$SynchronizedAsMapEntries$1;Ljava/util/Map$Entry;)V
+
+# writeList and readList
+writeList out/list.txt !!Synchronized
+readList out/list.txt ReadList
+size ReadList
+size ReadList - !!Synchronized
+
+# display command history
+history
+
+# write results
+writeOutput out/actual-results.txt

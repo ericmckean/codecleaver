@@ -1,0 +1,2785 @@
+# Script to test basic codecleaver operations
+#
+# TODO(peterhal): need more exhaustive tests
+
+# display help topics
+help
+topics 
+
+codecleaver
+workflow
+commands
+named-commands
+help
+exit
+history
+clearHistory
+read
+write
+writeOutput
+writeList
+readList
+cd
+pwd
+open
+openAssign
+openSymbols
+close
+clear
+clearAll
+listSets
+listOpenFiles
+listSymbolFiles
+list
+to
+from
+size
+info
+create
+delete
+add
+remove
+assign
+move
+cleave
+predefined-sets
+All
+Empty
+Packages
+Types
+Methods
+Fields
+Definitions
+NativeMethods
+AbstractMethods
+Interfaces
+Classes
+Publics
+Privates
+Protecteds
+PackagePrivates
+Statics
+Finals
+SynchronizedMethods
+VolatileFields
+VarArgsMethods
+TransientFields
+AbstractClasses
+Stricts
+Synthetics
+Annotations
+Externals
+Overrides
+UnextensiblePackages
+Initializers
+StaticInitializers
+symbols
+set-expressions
+binary-expression
+unary-expression
+primary-expression
+annotation-expression
+assignment-statement
+
+# display help for a command
+help list
+list set-expression
+
+Displays all symbols in the set expression.
+
+# display help for an aliased operator
+help +
+binary-expression 
+
+Syntax:
+        binary-expression:
+            binary-expression + unary-expression
+            binary-expression - unary-expression
+            binary-expression ^ unary-expression
+            unary-expression
+Binary operators are:
+            +  union
+            -  difference
+            ^  intersection
+
+# display complete help docs
+help all
+codecleaver 
+
+Code Cleaver is a tool for understanding dependencies in large Java codebases.
+Code Cleaver can help you understand how to split large Java jar files into
+smaller jars. Code Cleaver can also help in porting a java library from one
+java platform to another - from J2SE to J2ME for example.
+Code Cleaver operates on 2 levels. First, Code Cleaver manipulates sets of Java
+symbols. Symbols include packages, types, methods, and fields. Second, Code
+Cleaver allows querying of the dependency graph between symbols. An entry in
+the dependency graph is made whenever a symbol requires another symbol to run.
+For example if method print() calls toString() then the print() symbol depends
+on the toString() symbol. There are many ways that symbols can depend on each
+other. Some of the dependencies include: Class symbols depend on the symbols
+representing the class's base class and implemented interfaces. Field symbols
+depend on the symbol representing the field's type. Method symbols depend on
+all other methods called, fields referenced as well as the method's return
+type, parameter types and throws types.
+
+
+workflow 
+
+Code Cleaver has a command line interface. Executing Code Cleaver yields a
+command prompt. The command prompt is found in the Console Window when running
+Code Cleaver in Eclipse.
+A typical work flow would include:
+        1 - Loading some java jar files into Code Cleaver with the open command.
+        2 - Building user defined sets of symbols using the create, assign, add
+        and remove commands.
+        3 - Querying the dependency graph with the list command and set/graph
+        query expressions.
+        4 - Modifying your user defined sets using the add, remove and move
+        commands and query expressions.
+        5 - Iterating through steps 2, 3, and 4 until you have an answer to
+        your dependency question.
+        6 - Saving your command history with the write command so that you can
+        restore your state with the read command.
+        7 - Writing out set expressions with the writeList command.
+        8 - Removing parts of a jar and converting it to Java 1.6 bytecode
+        format using the cleave command.
+
+
+commands 
+
+Each line of input is treated as a command.
+        command:
+                #  comment
+                named-command
+                set-expression
+                assignment-statement
+A set-expression command is equivalent to the list set-expression named command.
+
+
+named-commands 
+
+help
+exit
+history
+clearHistory
+read
+write
+writeOutput
+writeList
+readList
+cd
+pwd
+open
+openAssign
+openSymbols
+close
+clear
+clearAll
+listSets
+listOpenFiles
+listSymbolFiles
+list
+to
+from
+size
+info
+create
+delete
+add
+remove
+assign
+move
+cleave
+
+
+help topic
+
+Display list of commands.
+
+
+exit 
+
+Exit CodeCleaver.
+
+
+history 
+
+Display list of commands executed this session.
+
+
+clearHistory 
+
+Clears the command and output history. Does not change the open files, symbols
+or dependency graph.
+
+
+read file-name
+
+Read and execute a list of commands from a file. When reading commands from a
+file, the write command is disabled.
+
+
+write file-name
+
+Write the list of commands executed this session to a file.
+
+
+writeOutput file-name
+
+Write the entire session output including commands and the output of those
+commands to a file.
+
+
+writeList file-name set-expression
+
+Write the contents of set-expression to file-name.
+
+
+readList set-name file-name
+
+Reads the contents of a file-name previously written with writeList and assign
+the result to set-name.
+
+
+cd directory-name
+
+Change current directory.
+
+
+pwd 
+
+Print current directory.
+
+
+open jar-file-name
+
+Loads symbols and dependency graph for a Java jar file. Creates a new symbol
+set whose name is 'jar-file' and contents includes all symbols defined in (but
+not referenced from) the jar file.
+
+
+openAssign new-set-name jar-file-name
+
+Loads symbols and dependency graph for a jar file and assigns the loaded
+symbols to the set-name. Equivalent to:
+        open jar-file
+        assign set-name jar-file
+
+
+openSymbols jar-file-name
+
+Loads symbols for a Java jar file. Creates a new symbol set whose name is
+'jar-file' and contents includes all symbols defined in (but not referenced
+from) the jar file. Does not load dependency information for the jar file.
+
+
+close jar-file-name
+
+Unloads symbols for a Java jar-file previously opened with open, openAssign or
+openSymbols.
+
+
+clear 
+
+Clears the current open files, symbols and dependency graph. Does not clear
+command history or output history.
+
+
+clearAll 
+
+Clears all state including open files, symbols, dependency graph, command
+history and output history. Equivalent to:
+        clear
+        clearHistory
+
+
+listSets 
+
+Displays all symbol sets currently defined.
+
+
+listOpenFiles 
+
+Displays a list of all files which have been open-ed.
+
+
+listSymbolFiles 
+
+Displays a list of all files which have been openSymbol-ed.
+
+
+list set-expression
+
+Displays all symbols in the set expression.
+
+
+to set-expression-to set-expression-from
+
+Displays all symbols which depend on symbols in set-expression-to. The output
+is grouped by minimum distance to a member in the 'to' set. Output stops when a
+member of set-expression-from is displayed.
+
+
+from set-expression-from set-expression-to
+
+Displays all symbols which the set-expression-from symbols depend on. The
+output is grouped by minimum distance to the 'from' set. Output stops when a
+member of set-expression-to is displayed
+
+
+size set-expression
+
+Displays the number of symbols in the set expression.
+
+
+info set-expression
+
+Displays detailed information on all symbols in a set.
+
+
+create set-name
+
+Create a new empty set.
+
+
+delete set-name
+
+Delete a named set. Predefined sets cannot be deleted.
+
+
+add set-name set-expression
+
+Add contents of set-expression to set-name.
+
+
+remove set-name set-expression
+
+Remove contents of set-expression to set-name.
+
+
+assign set-name set-expression
+
+Replaces the contents of set-name with set-expression. Will create set-name if
+it does not already exist.
+
+
+move from-set-name to-set-name set-expression
+
+Removes set-expression from the from-set-name. Adds contents of set-expression
+to to-set-name.
+
+
+cleave input-jar-file-name output-jar-file-name set-expression
+
+Reads in input-jar-file, and writes output-jar-file. Output-jar-file contains
+all symbols from input-far-file that are also contained in set-expression. The
+output-jar-file is written in java 1.6 bytecode format regardless of the format
+of the input-jar-file.
+
+
+predefined-sets 
+
+All
+Empty
+Packages
+Types
+Methods
+Fields
+Definitions
+NativeMethods
+AbstractMethods
+Interfaces
+Classes
+Publics
+Privates
+Protecteds
+PackagePrivates
+Statics
+Finals
+SynchronizedMethods
+VolatileFields
+VarArgsMethods
+TransientFields
+AbstractClasses
+Stricts
+Synthetics
+Annotations
+Externals
+Overrides
+UnextensiblePackages
+Initializers
+StaticInitializers
+
+
+All 
+
+Every Symbol known to the system.
+
+
+Empty 
+
+The empty set.
+
+
+Packages 
+
+All package symbols currently loaded.
+
+
+Types 
+
+All type symbols currently loaded.
+
+
+Methods 
+
+All method symbols currently loaded.
+
+
+Fields 
+
+All field symbols currently loaded.
+
+
+Definitions 
+
+Symbols which have been added to the dependency graph.
+
+
+NativeMethods 
+
+All methods which are implemented by native (C++) code in the dependency graph.
+
+
+AbstractMethods 
+
+All methods which are abstract. Includes both abstract methods in classes as
+well as abstract methods in interfaces.
+Note: Only methods loaded using open are included in AbstractMethods set.
+Symbols loaded with openSymbols are never added to NativeMethods.
+
+
+Interfaces 
+
+All interface types.
+
+
+Classes 
+
+All types which are not interfaces.
+Note: class/interface is only set correctly for symbols loaded using open. All
+types loaded with openSymbols are considered as classes.
+
+
+Publics 
+
+All types, fields, and methods which are public.
+
+
+Privates 
+
+All types, fields, and methods which are private.
+
+
+Protecteds 
+
+All types, fields, and methods which are protected.
+
+
+PackagePrivates 
+
+All types, fields, and methods which are package private.
+
+
+Statics 
+
+All static fields and methods.
+
+
+Finals 
+
+All types, fields and methods which are final.
+
+
+SynchronizedMethods 
+
+Methods which are synchronized.
+
+
+VolatileFields 
+
+Fields which are read and written by the VM in exactly the order described in
+source. Prevents VM optimizations which may be unsafe during multi-threaded
+access.
+
+
+VarArgsMethods 
+
+Methods whose last argument is a varargs array and may be called with a
+variable number of arguments.
+
+
+TransientFields 
+
+Fields that are not part of the persistent state of the object.
+
+
+AbstractClasses 
+
+Abstract classes. Does not include interfaces.
+
+
+Stricts 
+
+All classes and methods which perform strict precision floating point
+operations. By default floating point operations and intermediate values may
+have more precision than the minimum required.
+
+
+Synthetics 
+
+Types, fields and methods which are synthetic. Synthetic symbols are symbols
+which are not found in source. Typically means they are compiler generated for
+anonymous inner classes for example.
+
+
+Annotations 
+
+Types which are annotations.
+
+
+Externals 
+
+All packages, types, fields, and methods which are visible outside their
+containing jar. Package private members in the packages in the user defined set
+UnextensiblePackages will be considered non-External.
+
+
+Overrides 
+
+All methods which override a method from a base class or implement an interface
+method.
+
+
+UnextensiblePackages 
+
+A mutable set used to determine which package privates are visible externally.
+
+
+Initializers 
+
+All methods which are instance initializers. Aka constructors.
+
+
+StaticInitializers 
+
+All methods which are static initializers.
+
+
+symbols 
+
+Symbols include packages, types, methods and fields.
+Packages and types use the '/' character as separator.
+Example packages are 'java/lang', or 'com/google/common'.
+Example types are 'java/lang/Object' or 'java/io/File'.
+Member names use '.' as separator and have member signature appended.
+Example member names:
+java/lang/Object.<init>.()V
+java/lang/Object.clone.()Ljava/lang/Object;
+java/lang/Object.equals.(Ljava/lang/Object;)Z
+java/lang/Object.finalize.()V
+java/lang/Object.getClass.()Ljava/lang/Class;
+
+
+set-expressions 
+
+Sets of symbols are specified using set expressions.
+Syntax:
+        set-expression:
+            binary-expression
+
+
+binary-expression 
+
+Syntax:
+        binary-expression:
+            binary-expression + unary-expression
+            binary-expression - unary-expression
+            binary-expression ^ unary-expression
+            unary-expression
+Binary operators are:
+            +  union
+            -  difference
+            ^  intersection
+
+
+unary-expression 
+
+Unary Expressions
+Syntax:
+        unary-expression:
+            <  unary-expression
+            >  unary-expression
+            <*  unary-expression
+            >*  unary-expression
+            [  unary-expression
+            ]  unary-expression
+            [*  unary-expression
+            ]*  unary-expression
+            !  unary-expression
+            !*  unary-expression
+            primary-expression
+Unary operators are:
+        Dependency Graph Query Operators:
+            <  direct callees
+            >  direct callers
+            <*  transitive closure of direct callees
+            >*  transitive closure of direct callers
+        Inheritance Graph Query Operators:
+            [  direct overrides/inherits from
+            ]  directly overridden by/super class of
+            [*  transitive overrides/inherits from
+            ]*  transitive overridden by/super class of
+        Expand Operators:
+            !  direct children of all elements of the set
+            !*  all descendants of all elements of the set, including the
+            original set
+
+
+primary-expression 
+
+Primary Expressions
+Syntax:
+        primary-expression:
+            (  expression  )
+            annotation-expression
+            predefined-set
+            symbol
+            jar-file-name
+Primary expressions are either a predefined set, a symbol or a jar file.
+Primary expressions can be quoted in double quotes. There are no escapes within
+quoted expressions.
+When types, packages and jar file are used in a set expression the resulting
+expression includes all of their contained symbols: methods, fields and nested
+types.
+
+
+annotation-expression 
+
+Annotation Expressions
+Syntax:
+        annotation-expression:
+            @  type-symbol
+            @  type-symbol  (  )
+            @  type-symbol  (  element-value  )
+            @  type-symbol  (  element-name  =  element-value
+                    [  ,  element-name   =  element-value ] *  )
+Annotation expressions match any symbol with a matching annotation. The first
+two forms match any symbol with an annotation of the 'type-symbol' type
+regardless of annotation elements. The 'element-value' form is shorthand for
+@type-symbol(value=element-value). The form with element name value pairs
+matches symbols with an annotation of 'type-symbol' type, that have an element
+of name 'element-name' whose value, when converted to a string, is equal to
+'element-value'. If the type of the element named by 'element-name' is an array
+type then the pair matches if the element value contains 'element-value'.
+For Example:
+        @java/lang/annotation/Target(METHOD)
+Matches any annotation type which can target a method.
+
+
+assignment-statement 
+
+Assignment Statement
+Syntax:
+        assignment-statement:
+            set-name  =  set-expression
+            set-name  +=  set-expression
+            set-name  -=  set-expression
+            set-name  ^=  set-expression
+The simple assignment statement:
+        set-name  =  set-expression
+is equivalent to:
+        assign set-name set-expression
+A compound assignment:
+        set-name op= set-expression
+is equivalent to:
+        assign set-name ( set-name op set-expression ).
+
+
+topics 
+
+codecleaver
+workflow
+commands
+named-commands
+help
+exit
+history
+clearHistory
+read
+write
+writeOutput
+writeList
+readList
+cd
+pwd
+open
+openAssign
+openSymbols
+close
+clear
+clearAll
+listSets
+listOpenFiles
+listSymbolFiles
+list
+to
+from
+size
+info
+create
+delete
+add
+remove
+assign
+move
+cleave
+predefined-sets
+All
+Empty
+Packages
+Types
+Methods
+Fields
+Definitions
+NativeMethods
+AbstractMethods
+Interfaces
+Classes
+Publics
+Privates
+Protecteds
+PackagePrivates
+Statics
+Finals
+SynchronizedMethods
+VolatileFields
+VarArgsMethods
+TransientFields
+AbstractClasses
+Stricts
+Synthetics
+Annotations
+Externals
+Overrides
+UnextensiblePackages
+Initializers
+StaticInitializers
+symbols
+set-expressions
+binary-expression
+unary-expression
+primary-expression
+annotation-expression
+assignment-statement
+
+
+
+# open a jar file and assign it to the Guava variable
+openAssign Guava lib/guava-r06/guava-r06.jar
+
+# the special list operations
+listSets
+AbstractClasses
+AbstractMethods
+All
+Annotations
+Classes
+Definitions
+Empty
+Externals
+Fields
+Finals
+Guava
+Initializers
+Interfaces
+Methods
+NativeMethods
+Overrides
+PackagePrivates
+Packages
+Privates
+Protecteds
+Publics
+StaticInitializers
+Statics
+Stricts
+SynchronizedMethods
+Synthetics
+TransientFields
+Types
+VarArgsMethods
+VolatileFields
+lib/guava-r06/guava-r06.jar
+listOpenFiles
+lib/guava-r06/guava-r06.jar
+listSymbolFiles
+lib/guava-r06/guava-r06.jar
+
+# simple list
+list TransientFields
+com/google/common/base/Suppliers$ExpiringMemoizingSupplier.expirationNanos.J
+com/google/common/base/Suppliers$ExpiringMemoizingSupplier.initialized.Z
+com/google/common/base/Suppliers$ExpiringMemoizingSupplier.value.Ljava/lang/Object;
+com/google/common/base/Suppliers$MemoizingSupplier.initialized.Z
+com/google/common/base/Suppliers$MemoizingSupplier.value.Ljava/lang/Object;
+com/google/common/collect/AbstractBiMap.delegate.Ljava/util/Map;
+com/google/common/collect/AbstractBiMap.entrySet.Ljava/util/Set;
+com/google/common/collect/AbstractBiMap.inverse.Lcom/google/common/collect/AbstractBiMap;
+com/google/common/collect/AbstractBiMap.keySet.Ljava/util/Set;
+com/google/common/collect/AbstractBiMap.valueSet.Ljava/util/Set;
+com/google/common/collect/AbstractMapBasedMultiset.backingMap.Ljava/util/Map;
+com/google/common/collect/AbstractMapBasedMultiset.entrySet.Lcom/google/common/collect/AbstractMapBasedMultiset$EntrySet;
+com/google/common/collect/AbstractMapBasedMultiset.size.J
+com/google/common/collect/AbstractMultimap$AsMap.entrySet.Ljava/util/Set;
+com/google/common/collect/AbstractMultimap$AsMap.submap.Ljava/util/Map;
+com/google/common/collect/AbstractMultimap$MultisetView.entrySet.Ljava/util/Set;
+com/google/common/collect/AbstractMultimap.asMap.Ljava/util/Map;
+com/google/common/collect/AbstractMultimap.entries.Ljava/util/Collection;
+com/google/common/collect/AbstractMultimap.keySet.Ljava/util/Set;
+com/google/common/collect/AbstractMultimap.map.Ljava/util/Map;
+com/google/common/collect/AbstractMultimap.multiset.Lcom/google/common/collect/Multiset;
+com/google/common/collect/AbstractMultimap.totalSize.I
+com/google/common/collect/AbstractMultimap.valuesCollection.Ljava/util/Collection;
+com/google/common/collect/AbstractMultiset.elementSet.Ljava/util/Set;
+com/google/common/collect/ArrayListMultimap.expectedValuesPerKey.I
+com/google/common/collect/ComputingConcurrentHashMap$ComputingSerializationProxy.cache.Lcom/google/common/collect/MapMaker$Cache;
+com/google/common/collect/ConcurrentHashMultiset.countMap.Ljava/util/concurrent/ConcurrentMap;
+com/google/common/collect/ConcurrentHashMultiset.entrySet.Lcom/google/common/collect/ConcurrentHashMultiset$EntrySet;
+com/google/common/collect/CustomConcurrentHashMap$AbstractSerializationProxy.delegate.Ljava/util/concurrent/ConcurrentMap;
+com/google/common/collect/CustomConcurrentHashMap.entryFactory.Lcom/google/common/collect/CustomConcurrentHashMap$EntryFactory;
+com/google/common/collect/CustomConcurrentHashMap.segmentMask.I
+com/google/common/collect/CustomConcurrentHashMap.segmentShift.I
+com/google/common/collect/CustomConcurrentHashMap.segments.[Lcom/google/common/collect/CustomConcurrentHashMap$Segment;
+com/google/common/collect/EnumBiMap.keyType.Ljava/lang/Class;
+com/google/common/collect/EnumBiMap.valueType.Ljava/lang/Class;
+com/google/common/collect/EnumHashBiMap.keyType.Ljava/lang/Class;
+com/google/common/collect/EnumMultiset.type.Ljava/lang/Class;
+com/google/common/collect/HashMultimap.expectedValuesPerKey.I
+com/google/common/collect/ImmutableAsList.collection.Lcom/google/common/collect/ImmutableCollection;
+com/google/common/collect/ImmutableCollection.asList.Lcom/google/common/collect/ImmutableList;
+com/google/common/collect/ImmutableEnumSet.delegate.Ljava/util/EnumSet;
+com/google/common/collect/ImmutableEnumSet.hashCode.I
+com/google/common/collect/ImmutableMultimap.entries.Lcom/google/common/collect/ImmutableCollection;
+com/google/common/collect/ImmutableMultimap.keys.Lcom/google/common/collect/ImmutableMultiset;
+com/google/common/collect/ImmutableMultimap.map.Lcom/google/common/collect/ImmutableMap;
+com/google/common/collect/ImmutableMultimap.size.I
+com/google/common/collect/ImmutableMultimap.values.Lcom/google/common/collect/ImmutableCollection;
+com/google/common/collect/ImmutableMultiset.entrySet.Lcom/google/common/collect/ImmutableSet;
+com/google/common/collect/ImmutableMultiset.map.Lcom/google/common/collect/ImmutableMap;
+com/google/common/collect/ImmutableMultiset.size.I
+com/google/common/collect/ImmutableSet$ArrayImmutableSet.elements.[Ljava/lang/Object;
+com/google/common/collect/ImmutableSetMultimap.entries.Lcom/google/common/collect/ImmutableSet;
+com/google/common/collect/ImmutableSortedAsList.set.Lcom/google/common/collect/ImmutableSortedSet;
+com/google/common/collect/ImmutableSortedMap$EntrySet.map.Lcom/google/common/collect/ImmutableSortedMap;
+com/google/common/collect/ImmutableSortedMap.comparator.Ljava/util/Comparator;
+com/google/common/collect/ImmutableSortedMap.entries.[Ljava/util/Map$Entry;
+com/google/common/collect/ImmutableSortedMap.entrySet.Lcom/google/common/collect/ImmutableSet;
+com/google/common/collect/ImmutableSortedMap.fromIndex.I
+com/google/common/collect/ImmutableSortedMap.keySet.Lcom/google/common/collect/ImmutableSortedSet;
+com/google/common/collect/ImmutableSortedMap.toIndex.I
+com/google/common/collect/ImmutableSortedMap.values.Lcom/google/common/collect/ImmutableCollection;
+com/google/common/collect/ImmutableSortedSet.comparator.Ljava/util/Comparator;
+com/google/common/collect/LinkedHashMultimap.expectedValuesPerKey.I
+com/google/common/collect/LinkedHashMultimap.linkedEntries.Ljava/util/Collection;
+com/google/common/collect/LinkedListMultimap.entries.Ljava/util/Collection;
+com/google/common/collect/LinkedListMultimap.head.Lcom/google/common/collect/LinkedListMultimap$Node;
+com/google/common/collect/LinkedListMultimap.keyCount.Lcom/google/common/collect/Multiset;
+com/google/common/collect/LinkedListMultimap.keySet.Ljava/util/Set;
+com/google/common/collect/LinkedListMultimap.keyToKeyHead.Ljava/util/Map;
+com/google/common/collect/LinkedListMultimap.keyToKeyTail.Ljava/util/Map;
+com/google/common/collect/LinkedListMultimap.keys.Lcom/google/common/collect/Multiset;
+com/google/common/collect/LinkedListMultimap.map.Ljava/util/Map;
+com/google/common/collect/LinkedListMultimap.tail.Lcom/google/common/collect/LinkedListMultimap$Node;
+com/google/common/collect/LinkedListMultimap.valuesCollection.Ljava/util/Collection;
+com/google/common/collect/MapConstraints$ConstrainedBiMap.inverse.Lcom/google/common/collect/BiMap;
+com/google/common/collect/MapConstraints$ConstrainedMap.entrySet.Ljava/util/Set;
+com/google/common/collect/MapConstraints$ConstrainedMultimap.asMap.Ljava/util/Map;
+com/google/common/collect/MapConstraints$ConstrainedMultimap.entries.Ljava/util/Collection;
+com/google/common/collect/Maps$UnmodifiableBiMap.inverse.Lcom/google/common/collect/BiMap;
+com/google/common/collect/Maps$UnmodifiableBiMap.values.Ljava/util/Set;
+com/google/common/collect/Multimaps$CustomListMultimap.factory.Lcom/google/common/base/Supplier;
+com/google/common/collect/Multimaps$CustomMultimap.factory.Lcom/google/common/base/Supplier;
+com/google/common/collect/Multimaps$CustomSetMultimap.factory.Lcom/google/common/base/Supplier;
+com/google/common/collect/Multimaps$CustomSortedSetMultimap.factory.Lcom/google/common/base/Supplier;
+com/google/common/collect/Multimaps$CustomSortedSetMultimap.valueComparator.Ljava/util/Comparator;
+com/google/common/collect/Multimaps$MapMultimap.asMap.Ljava/util/Map;
+com/google/common/collect/Multimaps$UnmodifiableMultimap.entries.Ljava/util/Collection;
+com/google/common/collect/Multimaps$UnmodifiableMultimap.keySet.Ljava/util/Set;
+com/google/common/collect/Multimaps$UnmodifiableMultimap.keys.Lcom/google/common/collect/Multiset;
+com/google/common/collect/Multimaps$UnmodifiableMultimap.map.Ljava/util/Map;
+com/google/common/collect/Multimaps$UnmodifiableMultimap.values.Ljava/util/Collection;
+com/google/common/collect/Multisets$SetMultiset.elementSet.Ljava/util/Set;
+com/google/common/collect/Multisets$SetMultiset.entrySet.Ljava/util/Set;
+com/google/common/collect/Multisets$UnmodifiableMultiset.elementSet.Ljava/util/Set;
+com/google/common/collect/Multisets$UnmodifiableMultiset.entrySet.Ljava/util/Set;
+com/google/common/collect/RegularImmutableBiMap.delegate.Lcom/google/common/collect/ImmutableMap;
+com/google/common/collect/RegularImmutableBiMap.inverse.Lcom/google/common/collect/ImmutableBiMap;
+com/google/common/collect/RegularImmutableList.array.[Ljava/lang/Object;
+com/google/common/collect/RegularImmutableList.offset.I
+com/google/common/collect/RegularImmutableList.size.I
+com/google/common/collect/RegularImmutableMap$EntrySet.map.Lcom/google/common/collect/RegularImmutableMap;
+com/google/common/collect/RegularImmutableMap.entries.[Ljava/util/Map$Entry;
+com/google/common/collect/RegularImmutableMap.entrySet.Lcom/google/common/collect/ImmutableSet;
+com/google/common/collect/RegularImmutableMap.keySet.Lcom/google/common/collect/ImmutableSet;
+com/google/common/collect/RegularImmutableMap.keySetHashCode.I
+com/google/common/collect/RegularImmutableMap.mask.I
+com/google/common/collect/RegularImmutableMap.table.[Ljava/lang/Object;
+com/google/common/collect/RegularImmutableMap.values.Lcom/google/common/collect/ImmutableCollection;
+com/google/common/collect/RegularImmutableSet.hashCode.I
+com/google/common/collect/RegularImmutableSet.mask.I
+com/google/common/collect/RegularImmutableSet.table.[Ljava/lang/Object;
+com/google/common/collect/Sets$SetFromMap.s.Ljava/util/Set;
+com/google/common/collect/SingletonImmutableList.element.Ljava/lang/Object;
+com/google/common/collect/SingletonImmutableMap.entry.Ljava/util/Map$Entry;
+com/google/common/collect/SingletonImmutableMap.entrySet.Lcom/google/common/collect/ImmutableSet;
+com/google/common/collect/SingletonImmutableMap.keySet.Lcom/google/common/collect/ImmutableSet;
+com/google/common/collect/SingletonImmutableMap.singleKey.Ljava/lang/Object;
+com/google/common/collect/SingletonImmutableMap.singleValue.Ljava/lang/Object;
+com/google/common/collect/SingletonImmutableMap.values.Lcom/google/common/collect/ImmutableCollection;
+com/google/common/collect/SingletonImmutableSet.cachedHashCode.Ljava/lang/Integer;
+com/google/common/collect/SingletonImmutableSet.element.Ljava/lang/Object;
+com/google/common/collect/Synchronized$SynchronizedAsMap.asMapEntrySet.Ljava/util/Set;
+com/google/common/collect/Synchronized$SynchronizedAsMap.asMapValues.Ljava/util/Collection;
+com/google/common/collect/Synchronized$SynchronizedBiMap.inverse.Lcom/google/common/collect/BiMap;
+com/google/common/collect/Synchronized$SynchronizedBiMap.valueSet.Ljava/util/Set;
+com/google/common/collect/Synchronized$SynchronizedMap.entrySet.Ljava/util/Set;
+com/google/common/collect/Synchronized$SynchronizedMap.keySet.Ljava/util/Set;
+com/google/common/collect/Synchronized$SynchronizedMap.values.Ljava/util/Collection;
+com/google/common/collect/Synchronized$SynchronizedMultimap.asMap.Ljava/util/Map;
+com/google/common/collect/Synchronized$SynchronizedMultimap.entries.Ljava/util/Collection;
+com/google/common/collect/Synchronized$SynchronizedMultimap.keySet.Ljava/util/Set;
+com/google/common/collect/Synchronized$SynchronizedMultimap.keys.Lcom/google/common/collect/Multiset;
+com/google/common/collect/Synchronized$SynchronizedMultimap.valuesCollection.Ljava/util/Collection;
+com/google/common/collect/Synchronized$SynchronizedMultiset.elementSet.Ljava/util/Set;
+com/google/common/collect/Synchronized$SynchronizedMultiset.entrySet.Ljava/util/Set;
+com/google/common/collect/Synchronized$SynchronizedSetMultimap.entrySet.Ljava/util/Set;
+com/google/common/collect/TreeMultimap.keyComparator.Ljava/util/Comparator;
+com/google/common/collect/TreeMultimap.valueComparator.Ljava/util/Comparator;
+
+# the info command
+info com/google/common/collect/Synchronized
+Name: com/google/common/collect/Synchronized
+Type: Type
+Access: 30
+Parent: com/google/common/collect
+Super: java/lang/Object
+File: lib/guava-r06/guava-r06.jar
+  Annotation 1. Type: com/google/common/annotations/GwtCompatible
+    emulated: true
+
+Name: com/google/common/collect/Synchronized.<init>.()V
+Type: Method
+Access: 2
+Parent: com/google/common/collect/Synchronized
+
+Name: com/google/common/collect/Synchronized.collection.(Ljava/util/Collection;Ljava/lang/Object;)Ljava/util/Collection;
+Type: Method
+Access: A
+Parent: com/google/common/collect/Synchronized
+
+Name: com/google/common/collect/Synchronized.set.(Ljava/util/Set;Ljava/lang/Object;)Ljava/util/Set;
+Type: Method
+Access: 8
+Parent: com/google/common/collect/Synchronized
+  Annotation 1. Type: com/google/common/annotations/VisibleForTesting
+
+Name: com/google/common/collect/Synchronized.sortedSet.(Ljava/util/SortedSet;Ljava/lang/Object;)Ljava/util/SortedSet;
+Type: Method
+Access: A
+Parent: com/google/common/collect/Synchronized
+
+Name: com/google/common/collect/Synchronized.list.(Ljava/util/List;Ljava/lang/Object;)Ljava/util/List;
+Type: Method
+Access: A
+Parent: com/google/common/collect/Synchronized
+
+Name: com/google/common/collect/Synchronized.multiset.(Lcom/google/common/collect/Multiset;Ljava/lang/Object;)Lcom/google/common/collect/Multiset;
+Type: Method
+Access: 8
+Parent: com/google/common/collect/Synchronized
+
+Name: com/google/common/collect/Synchronized.multimap.(Lcom/google/common/collect/Multimap;Ljava/lang/Object;)Lcom/google/common/collect/Multimap;
+Type: Method
+Access: 8
+Parent: com/google/common/collect/Synchronized
+
+Name: com/google/common/collect/Synchronized.listMultimap.(Lcom/google/common/collect/ListMultimap;Ljava/lang/Object;)Lcom/google/common/collect/ListMultimap;
+Type: Method
+Access: 8
+Parent: com/google/common/collect/Synchronized
+
+Name: com/google/common/collect/Synchronized.setMultimap.(Lcom/google/common/collect/SetMultimap;Ljava/lang/Object;)Lcom/google/common/collect/SetMultimap;
+Type: Method
+Access: 8
+Parent: com/google/common/collect/Synchronized
+
+Name: com/google/common/collect/Synchronized.sortedSetMultimap.(Lcom/google/common/collect/SortedSetMultimap;Ljava/lang/Object;)Lcom/google/common/collect/SortedSetMultimap;
+Type: Method
+Access: 8
+Parent: com/google/common/collect/Synchronized
+
+Name: com/google/common/collect/Synchronized.typePreservingCollection.(Ljava/util/Collection;Ljava/lang/Object;)Ljava/util/Collection;
+Type: Method
+Access: A
+Parent: com/google/common/collect/Synchronized
+
+Name: com/google/common/collect/Synchronized.typePreservingSet.(Ljava/util/Set;Ljava/lang/Object;)Ljava/util/Set;
+Type: Method
+Access: A
+Parent: com/google/common/collect/Synchronized
+
+Name: com/google/common/collect/Synchronized.map.(Ljava/util/Map;Ljava/lang/Object;)Ljava/util/Map;
+Type: Method
+Access: 8
+Parent: com/google/common/collect/Synchronized
+  Annotation 1. Type: com/google/common/annotations/VisibleForTesting
+
+Name: com/google/common/collect/Synchronized.biMap.(Lcom/google/common/collect/BiMap;Ljava/lang/Object;)Lcom/google/common/collect/BiMap;
+Type: Method
+Access: 8
+Parent: com/google/common/collect/Synchronized
+
+Name: com/google/common/collect/Synchronized.access$200.(Ljava/util/SortedSet;Ljava/lang/Object;)Ljava/util/SortedSet;
+Type: Method
+Access: 1008
+Parent: com/google/common/collect/Synchronized
+
+Name: com/google/common/collect/Synchronized.access$300.(Ljava/util/List;Ljava/lang/Object;)Ljava/util/List;
+Type: Method
+Access: 1008
+Parent: com/google/common/collect/Synchronized
+
+Name: com/google/common/collect/Synchronized.access$400.(Ljava/util/Set;Ljava/lang/Object;)Ljava/util/Set;
+Type: Method
+Access: 1008
+Parent: com/google/common/collect/Synchronized
+
+Name: com/google/common/collect/Synchronized.access$500.(Ljava/util/Collection;Ljava/lang/Object;)Ljava/util/Collection;
+Type: Method
+Access: 1008
+Parent: com/google/common/collect/Synchronized
+
+Name: com/google/common/collect/Synchronized.access$600.(Ljava/util/Collection;Ljava/lang/Object;)Ljava/util/Collection;
+Type: Method
+Access: 1008
+Parent: com/google/common/collect/Synchronized
+
+Name: com/google/common/collect/Synchronized$1
+Type: Type
+Access: 1020
+Parent: com/google/common/collect/Synchronized
+Super: java/lang/Object
+File: lib/guava-r06/guava-r06.jar
+
+Name: com/google/common/collect/Synchronized$SynchronizedAsMap
+Type: Type
+Access: 20
+Parent: com/google/common/collect/Synchronized
+Super: com/google/common/collect/Synchronized$SynchronizedMap
+File: lib/guava-r06/guava-r06.jar
+
+Name: com/google/common/collect/Synchronized$SynchronizedAsMap.asMapEntrySet.Ljava/util/Set;
+Type: Field
+Access: 80
+Parent: com/google/common/collect/Synchronized$SynchronizedAsMap
+
+Name: com/google/common/collect/Synchronized$SynchronizedAsMap.asMapValues.Ljava/util/Collection;
+Type: Field
+Access: 80
+Parent: com/google/common/collect/Synchronized$SynchronizedAsMap
+
+Name: com/google/common/collect/Synchronized$SynchronizedAsMap.serialVersionUID.J
+Type: Field
+Access: 1A
+Parent: com/google/common/collect/Synchronized$SynchronizedAsMap
+
+Name: com/google/common/collect/Synchronized$SynchronizedAsMap.<init>.(Ljava/util/Map;Ljava/lang/Object;)V
+Type: Method
+Access: 0
+Parent: com/google/common/collect/Synchronized$SynchronizedAsMap
+
+Name: com/google/common/collect/Synchronized$SynchronizedAsMap.get.(Ljava/lang/Object;)Ljava/util/Collection;
+Type: Method
+Access: 1
+Parent: com/google/common/collect/Synchronized$SynchronizedAsMap
+
+Name: com/google/common/collect/Synchronized$SynchronizedAsMap.entrySet.()Ljava/util/Set;
+Type: Method
+Access: 1
+Parent: com/google/common/collect/Synchronized$SynchronizedAsMap
+
+Name: com/google/common/collect/Synchronized$SynchronizedAsMap.values.()Ljava/util/Collection;
+Type: Method
+Access: 1
+Parent: com/google/common/collect/Synchronized$SynchronizedAsMap
+
+Name: com/google/common/collect/Synchronized$SynchronizedAsMap.containsValue.(Ljava/lang/Object;)Z
+Type: Method
+Access: 1
+Parent: com/google/common/collect/Synchronized$SynchronizedAsMap
+
+Name: com/google/common/collect/Synchronized$SynchronizedAsMap.get.(Ljava/lang/Object;)Ljava/lang/Object;
+Type: Method
+Access: 1041
+Parent: com/google/common/collect/Synchronized$SynchronizedAsMap
+
+Name: com/google/common/collect/Synchronized$SynchronizedAsMapEntries
+Type: Type
+Access: 20
+Parent: com/google/common/collect/Synchronized
+Super: com/google/common/collect/Synchronized$SynchronizedSet
+File: lib/guava-r06/guava-r06.jar
+
+Name: com/google/common/collect/Synchronized$SynchronizedAsMapEntries.serialVersionUID.J
+Type: Field
+Access: 1A
+Parent: com/google/common/collect/Synchronized$SynchronizedAsMapEntries
+
+Name: com/google/common/collect/Synchronized$SynchronizedAsMapEntries.<init>.(Ljava/util/Set;Ljava/lang/Object;)V
+Type: Method
+Access: 0
+Parent: com/google/common/collect/Synchronized$SynchronizedAsMapEntries
+
+Name: com/google/common/collect/Synchronized$SynchronizedAsMapEntries.iterator.()Ljava/util/Iterator;
+Type: Method
+Access: 1
+Parent: com/google/common/collect/Synchronized$SynchronizedAsMapEntries
+
+Name: com/google/common/collect/Synchronized$SynchronizedAsMapEntries.toArray.()[Ljava/lang/Object;
+Type: Method
+Access: 1
+Parent: com/google/common/collect/Synchronized$SynchronizedAsMapEntries
+
+Name: com/google/common/collect/Synchronized$SynchronizedAsMapEntries.toArray.([Ljava/lang/Object;)[Ljava/lang/Object;
+Type: Method
+Access: 1
+Parent: com/google/common/collect/Synchronized$SynchronizedAsMapEntries
+
+Name: com/google/common/collect/Synchronized$SynchronizedAsMapEntries.contains.(Ljava/lang/Object;)Z
+Type: Method
+Access: 1
+Parent: com/google/common/collect/Synchronized$SynchronizedAsMapEntries
+
+Name: com/google/common/collect/Synchronized$SynchronizedAsMapEntries.containsAll.(Ljava/util/Collection;)Z
+Type: Method
+Access: 1
+Parent: com/google/common/collect/Synchronized$SynchronizedAsMapEntries
+
+Name: com/google/common/collect/Synchronized$SynchronizedAsMapEntries.equals.(Ljava/lang/Object;)Z
+Type: Method
+Access: 1
+Parent: com/google/common/collect/Synchronized$SynchronizedAsMapEntries
+
+Name: com/google/common/collect/Synchronized$SynchronizedAsMapEntries.remove.(Ljava/lang/Object;)Z
+Type: Method
+Access: 1
+Parent: com/google/common/collect/Synchronized$SynchronizedAsMapEntries
+
+Name: com/google/common/collect/Synchronized$SynchronizedAsMapEntries.removeAll.(Ljava/util/Collection;)Z
+Type: Method
+Access: 1
+Parent: com/google/common/collect/Synchronized$SynchronizedAsMapEntries
+
+Name: com/google/common/collect/Synchronized$SynchronizedAsMapEntries.retainAll.(Ljava/util/Collection;)Z
+Type: Method
+Access: 1
+Parent: com/google/common/collect/Synchronized$SynchronizedAsMapEntries
+
+Name: com/google/common/collect/Synchronized$SynchronizedAsMapEntries$1
+Type: Type
+Access: 20
+Parent: com/google/common/collect/Synchronized$SynchronizedAsMapEntries
+Super: com/google/common/collect/ForwardingIterator
+File: lib/guava-r06/guava-r06.jar
+
+Name: com/google/common/collect/Synchronized$SynchronizedAsMapEntries$1.val$iterator.Ljava/util/Iterator;
+Type: Field
+Access: 1010
+Parent: com/google/common/collect/Synchronized$SynchronizedAsMapEntries$1
+
+Name: com/google/common/collect/Synchronized$SynchronizedAsMapEntries$1.this$0.Lcom/google/common/collect/Synchronized$SynchronizedAsMapEntries;
+Type: Field
+Access: 1010
+Parent: com/google/common/collect/Synchronized$SynchronizedAsMapEntries$1
+
+Name: com/google/common/collect/Synchronized$SynchronizedAsMapEntries$1.<init>.(Lcom/google/common/collect/Synchronized$SynchronizedAsMapEntries;Ljava/util/Iterator;)V
+Type: Method
+Access: 0
+Parent: com/google/common/collect/Synchronized$SynchronizedAsMapEntries$1
+
+Name: com/google/common/collect/Synchronized$SynchronizedAsMapEntries$1.delegate.()Ljava/util/Iterator;
+Type: Method
+Access: 4
+Parent: com/google/common/collect/Synchronized$SynchronizedAsMapEntries$1
+
+Name: com/google/common/collect/Synchronized$SynchronizedAsMapEntries$1.next.()Ljava/util/Map$Entry;
+Type: Method
+Access: 1
+Parent: com/google/common/collect/Synchronized$SynchronizedAsMapEntries$1
+
+Name: com/google/common/collect/Synchronized$SynchronizedAsMapEntries$1.next.()Ljava/lang/Object;
+Type: Method
+Access: 1041
+Parent: com/google/common/collect/Synchronized$SynchronizedAsMapEntries$1
+
+Name: com/google/common/collect/Synchronized$SynchronizedAsMapEntries$1.delegate.()Ljava/lang/Object;
+Type: Method
+Access: 1044
+Parent: com/google/common/collect/Synchronized$SynchronizedAsMapEntries$1
+
+Name: com/google/common/collect/Synchronized$SynchronizedAsMapEntries$1$1
+Type: Type
+Access: 20
+Parent: com/google/common/collect/Synchronized$SynchronizedAsMapEntries$1
+Super: com/google/common/collect/ForwardingMapEntry
+File: lib/guava-r06/guava-r06.jar
+
+Name: com/google/common/collect/Synchronized$SynchronizedAsMapEntries$1$1.val$entry.Ljava/util/Map$Entry;
+Type: Field
+Access: 1010
+Parent: com/google/common/collect/Synchronized$SynchronizedAsMapEntries$1$1
+
+Name: com/google/common/collect/Synchronized$SynchronizedAsMapEntries$1$1.this$1.Lcom/google/common/collect/Synchronized$SynchronizedAsMapEntries$1;
+Type: Field
+Access: 1010
+Parent: com/google/common/collect/Synchronized$SynchronizedAsMapEntries$1$1
+
+Name: com/google/common/collect/Synchronized$SynchronizedAsMapEntries$1$1.<init>.(Lcom/google/common/collect/Synchronized$SynchronizedAsMapEntries$1;Ljava/util/Map$Entry;)V
+Type: Method
+Access: 0
+Parent: com/google/common/collect/Synchronized$SynchronizedAsMapEntries$1$1
+
+Name: com/google/common/collect/Synchronized$SynchronizedAsMapEntries$1$1.delegate.()Ljava/util/Map$Entry;
+Type: Method
+Access: 4
+Parent: com/google/common/collect/Synchronized$SynchronizedAsMapEntries$1$1
+
+Name: com/google/common/collect/Synchronized$SynchronizedAsMapEntries$1$1.getValue.()Ljava/util/Collection;
+Type: Method
+Access: 1
+Parent: com/google/common/collect/Synchronized$SynchronizedAsMapEntries$1$1
+
+Name: com/google/common/collect/Synchronized$SynchronizedAsMapEntries$1$1.getValue.()Ljava/lang/Object;
+Type: Method
+Access: 1041
+Parent: com/google/common/collect/Synchronized$SynchronizedAsMapEntries$1$1
+
+Name: com/google/common/collect/Synchronized$SynchronizedAsMapEntries$1$1.delegate.()Ljava/lang/Object;
+Type: Method
+Access: 1044
+Parent: com/google/common/collect/Synchronized$SynchronizedAsMapEntries$1$1
+
+Name: com/google/common/collect/Synchronized$SynchronizedAsMapValues
+Type: Type
+Access: 20
+Parent: com/google/common/collect/Synchronized
+Super: com/google/common/collect/Synchronized$SynchronizedCollection
+File: lib/guava-r06/guava-r06.jar
+
+Name: com/google/common/collect/Synchronized$SynchronizedAsMapValues.serialVersionUID.J
+Type: Field
+Access: 1A
+Parent: com/google/common/collect/Synchronized$SynchronizedAsMapValues
+
+Name: com/google/common/collect/Synchronized$SynchronizedAsMapValues.<init>.(Ljava/util/Collection;Ljava/lang/Object;)V
+Type: Method
+Access: 0
+Parent: com/google/common/collect/Synchronized$SynchronizedAsMapValues
+
+Name: com/google/common/collect/Synchronized$SynchronizedAsMapValues.iterator.()Ljava/util/Iterator;
+Type: Method
+Access: 1
+Parent: com/google/common/collect/Synchronized$SynchronizedAsMapValues
+
+Name: com/google/common/collect/Synchronized$SynchronizedAsMapValues$1
+Type: Type
+Access: 20
+Parent: com/google/common/collect/Synchronized$SynchronizedAsMapValues
+Super: com/google/common/collect/ForwardingIterator
+File: lib/guava-r06/guava-r06.jar
+
+Name: com/google/common/collect/Synchronized$SynchronizedAsMapValues$1.val$iterator.Ljava/util/Iterator;
+Type: Field
+Access: 1010
+Parent: com/google/common/collect/Synchronized$SynchronizedAsMapValues$1
+
+Name: com/google/common/collect/Synchronized$SynchronizedAsMapValues$1.this$0.Lcom/google/common/collect/Synchronized$SynchronizedAsMapValues;
+Type: Field
+Access: 1010
+Parent: com/google/common/collect/Synchronized$SynchronizedAsMapValues$1
+
+Name: com/google/common/collect/Synchronized$SynchronizedAsMapValues$1.<init>.(Lcom/google/common/collect/Synchronized$SynchronizedAsMapValues;Ljava/util/Iterator;)V
+Type: Method
+Access: 0
+Parent: com/google/common/collect/Synchronized$SynchronizedAsMapValues$1
+
+Name: com/google/common/collect/Synchronized$SynchronizedAsMapValues$1.delegate.()Ljava/util/Iterator;
+Type: Method
+Access: 4
+Parent: com/google/common/collect/Synchronized$SynchronizedAsMapValues$1
+
+Name: com/google/common/collect/Synchronized$SynchronizedAsMapValues$1.next.()Ljava/util/Collection;
+Type: Method
+Access: 1
+Parent: com/google/common/collect/Synchronized$SynchronizedAsMapValues$1
+
+Name: com/google/common/collect/Synchronized$SynchronizedAsMapValues$1.next.()Ljava/lang/Object;
+Type: Method
+Access: 1041
+Parent: com/google/common/collect/Synchronized$SynchronizedAsMapValues$1
+
+Name: com/google/common/collect/Synchronized$SynchronizedAsMapValues$1.delegate.()Ljava/lang/Object;
+Type: Method
+Access: 1044
+Parent: com/google/common/collect/Synchronized$SynchronizedAsMapValues$1
+
+Name: com/google/common/collect/Synchronized$SynchronizedBiMap
+Type: Type
+Access: 20
+Parent: com/google/common/collect/Synchronized
+Super: com/google/common/collect/Synchronized$SynchronizedMap
+Interface: com/google/common/collect/BiMap
+Interface: java/io/Serializable
+File: lib/guava-r06/guava-r06.jar
+  Annotation 1. Type: com/google/common/annotations/VisibleForTesting
+
+Name: com/google/common/collect/Synchronized$SynchronizedBiMap.valueSet.Ljava/util/Set;
+Type: Field
+Access: 82
+Parent: com/google/common/collect/Synchronized$SynchronizedBiMap
+
+Name: com/google/common/collect/Synchronized$SynchronizedBiMap.inverse.Lcom/google/common/collect/BiMap;
+Type: Field
+Access: 82
+Parent: com/google/common/collect/Synchronized$SynchronizedBiMap
+
+Name: com/google/common/collect/Synchronized$SynchronizedBiMap.serialVersionUID.J
+Type: Field
+Access: 1A
+Parent: com/google/common/collect/Synchronized$SynchronizedBiMap
+
+Name: com/google/common/collect/Synchronized$SynchronizedBiMap.<init>.(Lcom/google/common/collect/BiMap;Ljava/lang/Object;Lcom/google/common/collect/BiMap;)V
+Type: Method
+Access: 2
+Parent: com/google/common/collect/Synchronized$SynchronizedBiMap
+
+Name: com/google/common/collect/Synchronized$SynchronizedBiMap.delegate.()Lcom/google/common/collect/BiMap;
+Type: Method
+Access: 0
+Parent: com/google/common/collect/Synchronized$SynchronizedBiMap
+
+Name: com/google/common/collect/Synchronized$SynchronizedBiMap.values.()Ljava/util/Set;
+Type: Method
+Access: 1
+Parent: com/google/common/collect/Synchronized$SynchronizedBiMap
+
+Name: com/google/common/collect/Synchronized$SynchronizedBiMap.forcePut.(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
+Type: Method
+Access: 1
+Parent: com/google/common/collect/Synchronized$SynchronizedBiMap
+
+Name: com/google/common/collect/Synchronized$SynchronizedBiMap.inverse.()Lcom/google/common/collect/BiMap;
+Type: Method
+Access: 1
+Parent: com/google/common/collect/Synchronized$SynchronizedBiMap
+
+Name: com/google/common/collect/Synchronized$SynchronizedBiMap.values.()Ljava/util/Collection;
+Type: Method
+Access: 1041
+Parent: com/google/common/collect/Synchronized$SynchronizedBiMap
+
+Name: com/google/common/collect/Synchronized$SynchronizedBiMap.delegate.()Ljava/util/Map;
+Type: Method
+Access: 1040
+Parent: com/google/common/collect/Synchronized$SynchronizedBiMap
+
+Name: com/google/common/collect/Synchronized$SynchronizedBiMap.delegate.()Ljava/lang/Object;
+Type: Method
+Access: 1040
+Parent: com/google/common/collect/Synchronized$SynchronizedBiMap
+
+Name: com/google/common/collect/Synchronized$SynchronizedBiMap.<init>.(Lcom/google/common/collect/BiMap;Ljava/lang/Object;Lcom/google/common/collect/BiMap;Lcom/google/common/collect/Synchronized$1;)V
+Type: Method
+Access: 1000
+Parent: com/google/common/collect/Synchronized$SynchronizedBiMap
+
+Name: com/google/common/collect/Synchronized$SynchronizedCollection
+Type: Type
+Access: 20
+Parent: com/google/common/collect/Synchronized
+Super: com/google/common/collect/Synchronized$SynchronizedObject
+Interface: java/util/Collection
+File: lib/guava-r06/guava-r06.jar
+  Annotation 1. Type: com/google/common/annotations/VisibleForTesting
+
+Name: com/google/common/collect/Synchronized$SynchronizedCollection.serialVersionUID.J
+Type: Field
+Access: 1A
+Parent: com/google/common/collect/Synchronized$SynchronizedCollection
+
+Name: com/google/common/collect/Synchronized$SynchronizedCollection.<init>.(Ljava/util/Collection;Ljava/lang/Object;)V
+Type: Method
+Access: 2
+Parent: com/google/common/collect/Synchronized$SynchronizedCollection
+
+Name: com/google/common/collect/Synchronized$SynchronizedCollection.delegate.()Ljava/util/Collection;
+Type: Method
+Access: 0
+Parent: com/google/common/collect/Synchronized$SynchronizedCollection
+
+Name: com/google/common/collect/Synchronized$SynchronizedCollection.add.(Ljava/lang/Object;)Z
+Type: Method
+Access: 1
+Parent: com/google/common/collect/Synchronized$SynchronizedCollection
+
+Name: com/google/common/collect/Synchronized$SynchronizedCollection.addAll.(Ljava/util/Collection;)Z
+Type: Method
+Access: 1
+Parent: com/google/common/collect/Synchronized$SynchronizedCollection
+
+Name: com/google/common/collect/Synchronized$SynchronizedCollection.clear.()V
+Type: Method
+Access: 1
+Parent: com/google/common/collect/Synchronized$SynchronizedCollection
+
+Name: com/google/common/collect/Synchronized$SynchronizedCollection.contains.(Ljava/lang/Object;)Z
+Type: Method
+Access: 1
+Parent: com/google/common/collect/Synchronized$SynchronizedCollection
+
+Name: com/google/common/collect/Synchronized$SynchronizedCollection.containsAll.(Ljava/util/Collection;)Z
+Type: Method
+Access: 1
+Parent: com/google/common/collect/Synchronized$SynchronizedCollection
+
+Name: com/google/common/collect/Synchronized$SynchronizedCollection.isEmpty.()Z
+Type: Method
+Access: 1
+Parent: com/google/common/collect/Synchronized$SynchronizedCollection
+
+Name: com/google/common/collect/Synchronized$SynchronizedCollection.iterator.()Ljava/util/Iterator;
+Type: Method
+Access: 1
+Parent: com/google/common/collect/Synchronized$SynchronizedCollection
+
+Name: com/google/common/collect/Synchronized$SynchronizedCollection.remove.(Ljava/lang/Object;)Z
+Type: Method
+Access: 1
+Parent: com/google/common/collect/Synchronized$SynchronizedCollection
+
+Name: com/google/common/collect/Synchronized$SynchronizedCollection.removeAll.(Ljava/util/Collection;)Z
+Type: Method
+Access: 1
+Parent: com/google/common/collect/Synchronized$SynchronizedCollection
+
+Name: com/google/common/collect/Synchronized$SynchronizedCollection.retainAll.(Ljava/util/Collection;)Z
+Type: Method
+Access: 1
+Parent: com/google/common/collect/Synchronized$SynchronizedCollection
+
+Name: com/google/common/collect/Synchronized$SynchronizedCollection.size.()I
+Type: Method
+Access: 1
+Parent: com/google/common/collect/Synchronized$SynchronizedCollection
+
+Name: com/google/common/collect/Synchronized$SynchronizedCollection.toArray.()[Ljava/lang/Object;
+Type: Method
+Access: 1
+Parent: com/google/common/collect/Synchronized$SynchronizedCollection
+
+Name: com/google/common/collect/Synchronized$SynchronizedCollection.toArray.([Ljava/lang/Object;)[Ljava/lang/Object;
+Type: Method
+Access: 1
+Parent: com/google/common/collect/Synchronized$SynchronizedCollection
+
+Name: com/google/common/collect/Synchronized$SynchronizedCollection.delegate.()Ljava/lang/Object;
+Type: Method
+Access: 1040
+Parent: com/google/common/collect/Synchronized$SynchronizedCollection
+
+Name: com/google/common/collect/Synchronized$SynchronizedCollection.<init>.(Ljava/util/Collection;Ljava/lang/Object;Lcom/google/common/collect/Synchronized$1;)V
+Type: Method
+Access: 1000
+Parent: com/google/common/collect/Synchronized$SynchronizedCollection
+
+Name: com/google/common/collect/Synchronized$SynchronizedList
+Type: Type
+Access: 20
+Parent: com/google/common/collect/Synchronized
+Super: com/google/common/collect/Synchronized$SynchronizedCollection
+Interface: java/util/List
+File: lib/guava-r06/guava-r06.jar
+
+Name: com/google/common/collect/Synchronized$SynchronizedList.serialVersionUID.J
+Type: Field
+Access: 1A
+Parent: com/google/common/collect/Synchronized$SynchronizedList
+
+Name: com/google/common/collect/Synchronized$SynchronizedList.<init>.(Ljava/util/List;Ljava/lang/Object;)V
+Type: Method
+Access: 0
+Parent: com/google/common/collect/Synchronized$SynchronizedList
+
+Name: com/google/common/collect/Synchronized$SynchronizedList.delegate.()Ljava/util/List;
+Type: Method
+Access: 0
+Parent: com/google/common/collect/Synchronized$SynchronizedList
+
+Name: com/google/common/collect/Synchronized$SynchronizedList.add.(ILjava/lang/Object;)V
+Type: Method
+Access: 1
+Parent: com/google/common/collect/Synchronized$SynchronizedList
+
+Name: com/google/common/collect/Synchronized$SynchronizedList.addAll.(ILjava/util/Collection;)Z
+Type: Method
+Access: 1
+Parent: com/google/common/collect/Synchronized$SynchronizedList
+
+Name: com/google/common/collect/Synchronized$SynchronizedList.get.(I)Ljava/lang/Object;
+Type: Method
+Access: 1
+Parent: com/google/common/collect/Synchronized$SynchronizedList
+
+Name: com/google/common/collect/Synchronized$SynchronizedList.indexOf.(Ljava/lang/Object;)I
+Type: Method
+Access: 1
+Parent: com/google/common/collect/Synchronized$SynchronizedList
+
+Name: com/google/common/collect/Synchronized$SynchronizedList.lastIndexOf.(Ljava/lang/Object;)I
+Type: Method
+Access: 1
+Parent: com/google/common/collect/Synchronized$SynchronizedList
+
+Name: com/google/common/collect/Synchronized$SynchronizedList.listIterator.()Ljava/util/ListIterator;
+Type: Method
+Access: 1
+Parent: com/google/common/collect/Synchronized$SynchronizedList
+
+Name: com/google/common/collect/Synchronized$SynchronizedList.listIterator.(I)Ljava/util/ListIterator;
+Type: Method
+Access: 1
+Parent: com/google/common/collect/Synchronized$SynchronizedList
+
+Name: com/google/common/collect/Synchronized$SynchronizedList.remove.(I)Ljava/lang/Object;
+Type: Method
+Access: 1
+Parent: com/google/common/collect/Synchronized$SynchronizedList
+
+Name: com/google/common/collect/Synchronized$SynchronizedList.set.(ILjava/lang/Object;)Ljava/lang/Object;
+Type: Method
+Access: 1
+Parent: com/google/common/collect/Synchronized$SynchronizedList
+
+Name: com/google/common/collect/Synchronized$SynchronizedList.subList.(II)Ljava/util/List;
+Type: Method
+Access: 1
+Parent: com/google/common/collect/Synchronized$SynchronizedList
+
+Name: com/google/common/collect/Synchronized$SynchronizedList.equals.(Ljava/lang/Object;)Z
+Type: Method
+Access: 1
+Parent: com/google/common/collect/Synchronized$SynchronizedList
+
+Name: com/google/common/collect/Synchronized$SynchronizedList.hashCode.()I
+Type: Method
+Access: 1
+Parent: com/google/common/collect/Synchronized$SynchronizedList
+
+Name: com/google/common/collect/Synchronized$SynchronizedList.delegate.()Ljava/util/Collection;
+Type: Method
+Access: 1040
+Parent: com/google/common/collect/Synchronized$SynchronizedList
+
+Name: com/google/common/collect/Synchronized$SynchronizedList.delegate.()Ljava/lang/Object;
+Type: Method
+Access: 1040
+Parent: com/google/common/collect/Synchronized$SynchronizedList
+
+Name: com/google/common/collect/Synchronized$SynchronizedListMultimap
+Type: Type
+Access: 20
+Parent: com/google/common/collect/Synchronized
+Super: com/google/common/collect/Synchronized$SynchronizedMultimap
+Interface: com/google/common/collect/ListMultimap
+File: lib/guava-r06/guava-r06.jar
+
+Name: com/google/common/collect/Synchronized$SynchronizedListMultimap.serialVersionUID.J
+Type: Field
+Access: 1A
+Parent: com/google/common/collect/Synchronized$SynchronizedListMultimap
+
+Name: com/google/common/collect/Synchronized$SynchronizedListMultimap.<init>.(Lcom/google/common/collect/ListMultimap;Ljava/lang/Object;)V
+Type: Method
+Access: 0
+Parent: com/google/common/collect/Synchronized$SynchronizedListMultimap
+
+Name: com/google/common/collect/Synchronized$SynchronizedListMultimap.delegate.()Lcom/google/common/collect/ListMultimap;
+Type: Method
+Access: 0
+Parent: com/google/common/collect/Synchronized$SynchronizedListMultimap
+
+Name: com/google/common/collect/Synchronized$SynchronizedListMultimap.get.(Ljava/lang/Object;)Ljava/util/List;
+Type: Method
+Access: 1
+Parent: com/google/common/collect/Synchronized$SynchronizedListMultimap
+
+Name: com/google/common/collect/Synchronized$SynchronizedListMultimap.removeAll.(Ljava/lang/Object;)Ljava/util/List;
+Type: Method
+Access: 1
+Parent: com/google/common/collect/Synchronized$SynchronizedListMultimap
+
+Name: com/google/common/collect/Synchronized$SynchronizedListMultimap.replaceValues.(Ljava/lang/Object;Ljava/lang/Iterable;)Ljava/util/List;
+Type: Method
+Access: 1
+Parent: com/google/common/collect/Synchronized$SynchronizedListMultimap
+
+Name: com/google/common/collect/Synchronized$SynchronizedListMultimap.removeAll.(Ljava/lang/Object;)Ljava/util/Collection;
+Type: Method
+Access: 1041
+Parent: com/google/common/collect/Synchronized$SynchronizedListMultimap
+
+Name: com/google/common/collect/Synchronized$SynchronizedListMultimap.replaceValues.(Ljava/lang/Object;Ljava/lang/Iterable;)Ljava/util/Collection;
+Type: Method
+Access: 1041
+Parent: com/google/common/collect/Synchronized$SynchronizedListMultimap
+
+Name: com/google/common/collect/Synchronized$SynchronizedListMultimap.get.(Ljava/lang/Object;)Ljava/util/Collection;
+Type: Method
+Access: 1041
+Parent: com/google/common/collect/Synchronized$SynchronizedListMultimap
+
+Name: com/google/common/collect/Synchronized$SynchronizedListMultimap.delegate.()Lcom/google/common/collect/Multimap;
+Type: Method
+Access: 1040
+Parent: com/google/common/collect/Synchronized$SynchronizedListMultimap
+
+Name: com/google/common/collect/Synchronized$SynchronizedListMultimap.delegate.()Ljava/lang/Object;
+Type: Method
+Access: 1040
+Parent: com/google/common/collect/Synchronized$SynchronizedListMultimap
+
+Name: com/google/common/collect/Synchronized$SynchronizedMap
+Type: Type
+Access: 20
+Parent: com/google/common/collect/Synchronized
+Super: com/google/common/collect/Synchronized$SynchronizedObject
+Interface: java/util/Map
+File: lib/guava-r06/guava-r06.jar
+
+Name: com/google/common/collect/Synchronized$SynchronizedMap.keySet.Ljava/util/Set;
+Type: Field
+Access: 80
+Parent: com/google/common/collect/Synchronized$SynchronizedMap
+
+Name: com/google/common/collect/Synchronized$SynchronizedMap.values.Ljava/util/Collection;
+Type: Field
+Access: 80
+Parent: com/google/common/collect/Synchronized$SynchronizedMap
+
+Name: com/google/common/collect/Synchronized$SynchronizedMap.entrySet.Ljava/util/Set;
+Type: Field
+Access: 80
+Parent: com/google/common/collect/Synchronized$SynchronizedMap
+
+Name: com/google/common/collect/Synchronized$SynchronizedMap.serialVersionUID.J
+Type: Field
+Access: 1A
+Parent: com/google/common/collect/Synchronized$SynchronizedMap
+
+Name: com/google/common/collect/Synchronized$SynchronizedMap.<init>.(Ljava/util/Map;Ljava/lang/Object;)V
+Type: Method
+Access: 2
+Parent: com/google/common/collect/Synchronized$SynchronizedMap
+
+Name: com/google/common/collect/Synchronized$SynchronizedMap.delegate.()Ljava/util/Map;
+Type: Method
+Access: 0
+Parent: com/google/common/collect/Synchronized$SynchronizedMap
+
+Name: com/google/common/collect/Synchronized$SynchronizedMap.clear.()V
+Type: Method
+Access: 1
+Parent: com/google/common/collect/Synchronized$SynchronizedMap
+
+Name: com/google/common/collect/Synchronized$SynchronizedMap.containsKey.(Ljava/lang/Object;)Z
+Type: Method
+Access: 1
+Parent: com/google/common/collect/Synchronized$SynchronizedMap
+
+Name: com/google/common/collect/Synchronized$SynchronizedMap.containsValue.(Ljava/lang/Object;)Z
+Type: Method
+Access: 1
+Parent: com/google/common/collect/Synchronized$SynchronizedMap
+
+Name: com/google/common/collect/Synchronized$SynchronizedMap.entrySet.()Ljava/util/Set;
+Type: Method
+Access: 1
+Parent: com/google/common/collect/Synchronized$SynchronizedMap
+
+Name: com/google/common/collect/Synchronized$SynchronizedMap.get.(Ljava/lang/Object;)Ljava/lang/Object;
+Type: Method
+Access: 1
+Parent: com/google/common/collect/Synchronized$SynchronizedMap
+
+Name: com/google/common/collect/Synchronized$SynchronizedMap.isEmpty.()Z
+Type: Method
+Access: 1
+Parent: com/google/common/collect/Synchronized$SynchronizedMap
+
+Name: com/google/common/collect/Synchronized$SynchronizedMap.keySet.()Ljava/util/Set;
+Type: Method
+Access: 1
+Parent: com/google/common/collect/Synchronized$SynchronizedMap
+
+Name: com/google/common/collect/Synchronized$SynchronizedMap.put.(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
+Type: Method
+Access: 1
+Parent: com/google/common/collect/Synchronized$SynchronizedMap
+
+Name: com/google/common/collect/Synchronized$SynchronizedMap.putAll.(Ljava/util/Map;)V
+Type: Method
+Access: 1
+Parent: com/google/common/collect/Synchronized$SynchronizedMap
+
+Name: com/google/common/collect/Synchronized$SynchronizedMap.remove.(Ljava/lang/Object;)Ljava/lang/Object;
+Type: Method
+Access: 1
+Parent: com/google/common/collect/Synchronized$SynchronizedMap
+
+Name: com/google/common/collect/Synchronized$SynchronizedMap.size.()I
+Type: Method
+Access: 1
+Parent: com/google/common/collect/Synchronized$SynchronizedMap
+
+Name: com/google/common/collect/Synchronized$SynchronizedMap.values.()Ljava/util/Collection;
+Type: Method
+Access: 1
+Parent: com/google/common/collect/Synchronized$SynchronizedMap
+
+Name: com/google/common/collect/Synchronized$SynchronizedMap.equals.(Ljava/lang/Object;)Z
+Type: Method
+Access: 1
+Parent: com/google/common/collect/Synchronized$SynchronizedMap
+
+Name: com/google/common/collect/Synchronized$SynchronizedMap.hashCode.()I
+Type: Method
+Access: 1
+Parent: com/google/common/collect/Synchronized$SynchronizedMap
+
+Name: com/google/common/collect/Synchronized$SynchronizedMap.delegate.()Ljava/lang/Object;
+Type: Method
+Access: 1040
+Parent: com/google/common/collect/Synchronized$SynchronizedMap
+
+Name: com/google/common/collect/Synchronized$SynchronizedMap.<init>.(Ljava/util/Map;Ljava/lang/Object;Lcom/google/common/collect/Synchronized$1;)V
+Type: Method
+Access: 1000
+Parent: com/google/common/collect/Synchronized$SynchronizedMap
+
+Name: com/google/common/collect/Synchronized$SynchronizedMultimap
+Type: Type
+Access: 20
+Parent: com/google/common/collect/Synchronized
+Super: com/google/common/collect/Synchronized$SynchronizedObject
+Interface: com/google/common/collect/Multimap
+File: lib/guava-r06/guava-r06.jar
+
+Name: com/google/common/collect/Synchronized$SynchronizedMultimap.keySet.Ljava/util/Set;
+Type: Field
+Access: 80
+Parent: com/google/common/collect/Synchronized$SynchronizedMultimap
+
+Name: com/google/common/collect/Synchronized$SynchronizedMultimap.valuesCollection.Ljava/util/Collection;
+Type: Field
+Access: 80
+Parent: com/google/common/collect/Synchronized$SynchronizedMultimap
+
+Name: com/google/common/collect/Synchronized$SynchronizedMultimap.entries.Ljava/util/Collection;
+Type: Field
+Access: 80
+Parent: com/google/common/collect/Synchronized$SynchronizedMultimap
+
+Name: com/google/common/collect/Synchronized$SynchronizedMultimap.asMap.Ljava/util/Map;
+Type: Field
+Access: 80
+Parent: com/google/common/collect/Synchronized$SynchronizedMultimap
+
+Name: com/google/common/collect/Synchronized$SynchronizedMultimap.keys.Lcom/google/common/collect/Multiset;
+Type: Field
+Access: 80
+Parent: com/google/common/collect/Synchronized$SynchronizedMultimap
+
+Name: com/google/common/collect/Synchronized$SynchronizedMultimap.serialVersionUID.J
+Type: Field
+Access: 1A
+Parent: com/google/common/collect/Synchronized$SynchronizedMultimap
+
+Name: com/google/common/collect/Synchronized$SynchronizedMultimap.delegate.()Lcom/google/common/collect/Multimap;
+Type: Method
+Access: 0
+Parent: com/google/common/collect/Synchronized$SynchronizedMultimap
+
+Name: com/google/common/collect/Synchronized$SynchronizedMultimap.<init>.(Lcom/google/common/collect/Multimap;Ljava/lang/Object;)V
+Type: Method
+Access: 0
+Parent: com/google/common/collect/Synchronized$SynchronizedMultimap
+
+Name: com/google/common/collect/Synchronized$SynchronizedMultimap.size.()I
+Type: Method
+Access: 1
+Parent: com/google/common/collect/Synchronized$SynchronizedMultimap
+
+Name: com/google/common/collect/Synchronized$SynchronizedMultimap.isEmpty.()Z
+Type: Method
+Access: 1
+Parent: com/google/common/collect/Synchronized$SynchronizedMultimap
+
+Name: com/google/common/collect/Synchronized$SynchronizedMultimap.containsKey.(Ljava/lang/Object;)Z
+Type: Method
+Access: 1
+Parent: com/google/common/collect/Synchronized$SynchronizedMultimap
+
+Name: com/google/common/collect/Synchronized$SynchronizedMultimap.containsValue.(Ljava/lang/Object;)Z
+Type: Method
+Access: 1
+Parent: com/google/common/collect/Synchronized$SynchronizedMultimap
+
+Name: com/google/common/collect/Synchronized$SynchronizedMultimap.containsEntry.(Ljava/lang/Object;Ljava/lang/Object;)Z
+Type: Method
+Access: 1
+Parent: com/google/common/collect/Synchronized$SynchronizedMultimap
+
+Name: com/google/common/collect/Synchronized$SynchronizedMultimap.get.(Ljava/lang/Object;)Ljava/util/Collection;
+Type: Method
+Access: 1
+Parent: com/google/common/collect/Synchronized$SynchronizedMultimap
+
+Name: com/google/common/collect/Synchronized$SynchronizedMultimap.put.(Ljava/lang/Object;Ljava/lang/Object;)Z
+Type: Method
+Access: 1
+Parent: com/google/common/collect/Synchronized$SynchronizedMultimap
+
+Name: com/google/common/collect/Synchronized$SynchronizedMultimap.putAll.(Ljava/lang/Object;Ljava/lang/Iterable;)Z
+Type: Method
+Access: 1
+Parent: com/google/common/collect/Synchronized$SynchronizedMultimap
+
+Name: com/google/common/collect/Synchronized$SynchronizedMultimap.putAll.(Lcom/google/common/collect/Multimap;)Z
+Type: Method
+Access: 1
+Parent: com/google/common/collect/Synchronized$SynchronizedMultimap
+
+Name: com/google/common/collect/Synchronized$SynchronizedMultimap.replaceValues.(Ljava/lang/Object;Ljava/lang/Iterable;)Ljava/util/Collection;
+Type: Method
+Access: 1
+Parent: com/google/common/collect/Synchronized$SynchronizedMultimap
+
+Name: com/google/common/collect/Synchronized$SynchronizedMultimap.remove.(Ljava/lang/Object;Ljava/lang/Object;)Z
+Type: Method
+Access: 1
+Parent: com/google/common/collect/Synchronized$SynchronizedMultimap
+
+Name: com/google/common/collect/Synchronized$SynchronizedMultimap.removeAll.(Ljava/lang/Object;)Ljava/util/Collection;
+Type: Method
+Access: 1
+Parent: com/google/common/collect/Synchronized$SynchronizedMultimap
+
+Name: com/google/common/collect/Synchronized$SynchronizedMultimap.clear.()V
+Type: Method
+Access: 1
+Parent: com/google/common/collect/Synchronized$SynchronizedMultimap
+
+Name: com/google/common/collect/Synchronized$SynchronizedMultimap.keySet.()Ljava/util/Set;
+Type: Method
+Access: 1
+Parent: com/google/common/collect/Synchronized$SynchronizedMultimap
+
+Name: com/google/common/collect/Synchronized$SynchronizedMultimap.values.()Ljava/util/Collection;
+Type: Method
+Access: 1
+Parent: com/google/common/collect/Synchronized$SynchronizedMultimap
+
+Name: com/google/common/collect/Synchronized$SynchronizedMultimap.entries.()Ljava/util/Collection;
+Type: Method
+Access: 1
+Parent: com/google/common/collect/Synchronized$SynchronizedMultimap
+
+Name: com/google/common/collect/Synchronized$SynchronizedMultimap.asMap.()Ljava/util/Map;
+Type: Method
+Access: 1
+Parent: com/google/common/collect/Synchronized$SynchronizedMultimap
+
+Name: com/google/common/collect/Synchronized$SynchronizedMultimap.keys.()Lcom/google/common/collect/Multiset;
+Type: Method
+Access: 1
+Parent: com/google/common/collect/Synchronized$SynchronizedMultimap
+
+Name: com/google/common/collect/Synchronized$SynchronizedMultimap.equals.(Ljava/lang/Object;)Z
+Type: Method
+Access: 1
+Parent: com/google/common/collect/Synchronized$SynchronizedMultimap
+
+Name: com/google/common/collect/Synchronized$SynchronizedMultimap.hashCode.()I
+Type: Method
+Access: 1
+Parent: com/google/common/collect/Synchronized$SynchronizedMultimap
+
+Name: com/google/common/collect/Synchronized$SynchronizedMultimap.delegate.()Ljava/lang/Object;
+Type: Method
+Access: 1040
+Parent: com/google/common/collect/Synchronized$SynchronizedMultimap
+
+Name: com/google/common/collect/Synchronized$SynchronizedMultiset
+Type: Type
+Access: 20
+Parent: com/google/common/collect/Synchronized
+Super: com/google/common/collect/Synchronized$SynchronizedCollection
+Interface: com/google/common/collect/Multiset
+File: lib/guava-r06/guava-r06.jar
+
+Name: com/google/common/collect/Synchronized$SynchronizedMultiset.elementSet.Ljava/util/Set;
+Type: Field
+Access: 80
+Parent: com/google/common/collect/Synchronized$SynchronizedMultiset
+
+Name: com/google/common/collect/Synchronized$SynchronizedMultiset.entrySet.Ljava/util/Set;
+Type: Field
+Access: 80
+Parent: com/google/common/collect/Synchronized$SynchronizedMultiset
+
+Name: com/google/common/collect/Synchronized$SynchronizedMultiset.serialVersionUID.J
+Type: Field
+Access: 1A
+Parent: com/google/common/collect/Synchronized$SynchronizedMultiset
+
+Name: com/google/common/collect/Synchronized$SynchronizedMultiset.<init>.(Lcom/google/common/collect/Multiset;Ljava/lang/Object;)V
+Type: Method
+Access: 0
+Parent: com/google/common/collect/Synchronized$SynchronizedMultiset
+
+Name: com/google/common/collect/Synchronized$SynchronizedMultiset.delegate.()Lcom/google/common/collect/Multiset;
+Type: Method
+Access: 0
+Parent: com/google/common/collect/Synchronized$SynchronizedMultiset
+
+Name: com/google/common/collect/Synchronized$SynchronizedMultiset.count.(Ljava/lang/Object;)I
+Type: Method
+Access: 1
+Parent: com/google/common/collect/Synchronized$SynchronizedMultiset
+
+Name: com/google/common/collect/Synchronized$SynchronizedMultiset.add.(Ljava/lang/Object;I)I
+Type: Method
+Access: 1
+Parent: com/google/common/collect/Synchronized$SynchronizedMultiset
+
+Name: com/google/common/collect/Synchronized$SynchronizedMultiset.remove.(Ljava/lang/Object;I)I
+Type: Method
+Access: 1
+Parent: com/google/common/collect/Synchronized$SynchronizedMultiset
+
+Name: com/google/common/collect/Synchronized$SynchronizedMultiset.setCount.(Ljava/lang/Object;I)I
+Type: Method
+Access: 1
+Parent: com/google/common/collect/Synchronized$SynchronizedMultiset
+
+Name: com/google/common/collect/Synchronized$SynchronizedMultiset.setCount.(Ljava/lang/Object;II)Z
+Type: Method
+Access: 1
+Parent: com/google/common/collect/Synchronized$SynchronizedMultiset
+
+Name: com/google/common/collect/Synchronized$SynchronizedMultiset.elementSet.()Ljava/util/Set;
+Type: Method
+Access: 1
+Parent: com/google/common/collect/Synchronized$SynchronizedMultiset
+
+Name: com/google/common/collect/Synchronized$SynchronizedMultiset.entrySet.()Ljava/util/Set;
+Type: Method
+Access: 1
+Parent: com/google/common/collect/Synchronized$SynchronizedMultiset
+
+Name: com/google/common/collect/Synchronized$SynchronizedMultiset.equals.(Ljava/lang/Object;)Z
+Type: Method
+Access: 1
+Parent: com/google/common/collect/Synchronized$SynchronizedMultiset
+
+Name: com/google/common/collect/Synchronized$SynchronizedMultiset.hashCode.()I
+Type: Method
+Access: 1
+Parent: com/google/common/collect/Synchronized$SynchronizedMultiset
+
+Name: com/google/common/collect/Synchronized$SynchronizedMultiset.delegate.()Ljava/util/Collection;
+Type: Method
+Access: 1040
+Parent: com/google/common/collect/Synchronized$SynchronizedMultiset
+
+Name: com/google/common/collect/Synchronized$SynchronizedMultiset.delegate.()Ljava/lang/Object;
+Type: Method
+Access: 1040
+Parent: com/google/common/collect/Synchronized$SynchronizedMultiset
+
+Name: com/google/common/collect/Synchronized$SynchronizedObject
+Type: Type
+Access: 20
+Parent: com/google/common/collect/Synchronized
+Super: java/lang/Object
+Interface: java/io/Serializable
+File: lib/guava-r06/guava-r06.jar
+
+Name: com/google/common/collect/Synchronized$SynchronizedObject.delegate.Ljava/lang/Object;
+Type: Field
+Access: 10
+Parent: com/google/common/collect/Synchronized$SynchronizedObject
+
+Name: com/google/common/collect/Synchronized$SynchronizedObject.mutex.Ljava/lang/Object;
+Type: Field
+Access: 10
+Parent: com/google/common/collect/Synchronized$SynchronizedObject
+
+Name: com/google/common/collect/Synchronized$SynchronizedObject.serialVersionUID.J
+Type: Field
+Access: 1A
+Parent: com/google/common/collect/Synchronized$SynchronizedObject
+  Annotation 1. Type: com/google/common/annotations/GwtIncompatible
+    value: not needed in emulated source
+
+Name: com/google/common/collect/Synchronized$SynchronizedObject.<init>.(Ljava/lang/Object;Ljava/lang/Object;)V
+Type: Method
+Access: 0
+Parent: com/google/common/collect/Synchronized$SynchronizedObject
+
+Name: com/google/common/collect/Synchronized$SynchronizedObject.delegate.()Ljava/lang/Object;
+Type: Method
+Access: 0
+Parent: com/google/common/collect/Synchronized$SynchronizedObject
+
+Name: com/google/common/collect/Synchronized$SynchronizedObject.toString.()Ljava/lang/String;
+Type: Method
+Access: 1
+Parent: com/google/common/collect/Synchronized$SynchronizedObject
+
+Name: com/google/common/collect/Synchronized$SynchronizedObject.writeObject.(Ljava/io/ObjectOutputStream;)V
+Type: Method
+Access: 2
+Parent: com/google/common/collect/Synchronized$SynchronizedObject
+  Annotation 1. Type: com/google/common/annotations/GwtIncompatible
+    value: java.io.ObjectOutputStream
+
+Name: com/google/common/collect/Synchronized$SynchronizedRandomAccessList
+Type: Type
+Access: 20
+Parent: com/google/common/collect/Synchronized
+Super: com/google/common/collect/Synchronized$SynchronizedList
+Interface: java/util/RandomAccess
+File: lib/guava-r06/guava-r06.jar
+
+Name: com/google/common/collect/Synchronized$SynchronizedRandomAccessList.serialVersionUID.J
+Type: Field
+Access: 1A
+Parent: com/google/common/collect/Synchronized$SynchronizedRandomAccessList
+
+Name: com/google/common/collect/Synchronized$SynchronizedRandomAccessList.<init>.(Ljava/util/List;Ljava/lang/Object;)V
+Type: Method
+Access: 0
+Parent: com/google/common/collect/Synchronized$SynchronizedRandomAccessList
+
+Name: com/google/common/collect/Synchronized$SynchronizedSet
+Type: Type
+Access: 20
+Parent: com/google/common/collect/Synchronized
+Super: com/google/common/collect/Synchronized$SynchronizedCollection
+Interface: java/util/Set
+File: lib/guava-r06/guava-r06.jar
+  Annotation 1. Type: com/google/common/annotations/VisibleForTesting
+
+Name: com/google/common/collect/Synchronized$SynchronizedSet.serialVersionUID.J
+Type: Field
+Access: 1A
+Parent: com/google/common/collect/Synchronized$SynchronizedSet
+
+Name: com/google/common/collect/Synchronized$SynchronizedSet.<init>.(Ljava/util/Set;Ljava/lang/Object;)V
+Type: Method
+Access: 2
+Parent: com/google/common/collect/Synchronized$SynchronizedSet
+
+Name: com/google/common/collect/Synchronized$SynchronizedSet.delegate.()Ljava/util/Set;
+Type: Method
+Access: 0
+Parent: com/google/common/collect/Synchronized$SynchronizedSet
+
+Name: com/google/common/collect/Synchronized$SynchronizedSet.equals.(Ljava/lang/Object;)Z
+Type: Method
+Access: 1
+Parent: com/google/common/collect/Synchronized$SynchronizedSet
+
+Name: com/google/common/collect/Synchronized$SynchronizedSet.hashCode.()I
+Type: Method
+Access: 1
+Parent: com/google/common/collect/Synchronized$SynchronizedSet
+
+Name: com/google/common/collect/Synchronized$SynchronizedSet.delegate.()Ljava/util/Collection;
+Type: Method
+Access: 1040
+Parent: com/google/common/collect/Synchronized$SynchronizedSet
+
+Name: com/google/common/collect/Synchronized$SynchronizedSet.delegate.()Ljava/lang/Object;
+Type: Method
+Access: 1040
+Parent: com/google/common/collect/Synchronized$SynchronizedSet
+
+Name: com/google/common/collect/Synchronized$SynchronizedSet.<init>.(Ljava/util/Set;Ljava/lang/Object;Lcom/google/common/collect/Synchronized$1;)V
+Type: Method
+Access: 1000
+Parent: com/google/common/collect/Synchronized$SynchronizedSet
+
+Name: com/google/common/collect/Synchronized$SynchronizedSetMultimap
+Type: Type
+Access: 20
+Parent: com/google/common/collect/Synchronized
+Super: com/google/common/collect/Synchronized$SynchronizedMultimap
+Interface: com/google/common/collect/SetMultimap
+File: lib/guava-r06/guava-r06.jar
+
+Name: com/google/common/collect/Synchronized$SynchronizedSetMultimap.entrySet.Ljava/util/Set;
+Type: Field
+Access: 80
+Parent: com/google/common/collect/Synchronized$SynchronizedSetMultimap
+
+Name: com/google/common/collect/Synchronized$SynchronizedSetMultimap.serialVersionUID.J
+Type: Field
+Access: 1A
+Parent: com/google/common/collect/Synchronized$SynchronizedSetMultimap
+
+Name: com/google/common/collect/Synchronized$SynchronizedSetMultimap.<init>.(Lcom/google/common/collect/SetMultimap;Ljava/lang/Object;)V
+Type: Method
+Access: 0
+Parent: com/google/common/collect/Synchronized$SynchronizedSetMultimap
+
+Name: com/google/common/collect/Synchronized$SynchronizedSetMultimap.delegate.()Lcom/google/common/collect/SetMultimap;
+Type: Method
+Access: 0
+Parent: com/google/common/collect/Synchronized$SynchronizedSetMultimap
+
+Name: com/google/common/collect/Synchronized$SynchronizedSetMultimap.get.(Ljava/lang/Object;)Ljava/util/Set;
+Type: Method
+Access: 1
+Parent: com/google/common/collect/Synchronized$SynchronizedSetMultimap
+
+Name: com/google/common/collect/Synchronized$SynchronizedSetMultimap.removeAll.(Ljava/lang/Object;)Ljava/util/Set;
+Type: Method
+Access: 1
+Parent: com/google/common/collect/Synchronized$SynchronizedSetMultimap
+
+Name: com/google/common/collect/Synchronized$SynchronizedSetMultimap.replaceValues.(Ljava/lang/Object;Ljava/lang/Iterable;)Ljava/util/Set;
+Type: Method
+Access: 1
+Parent: com/google/common/collect/Synchronized$SynchronizedSetMultimap
+
+Name: com/google/common/collect/Synchronized$SynchronizedSetMultimap.entries.()Ljava/util/Set;
+Type: Method
+Access: 1
+Parent: com/google/common/collect/Synchronized$SynchronizedSetMultimap
+
+Name: com/google/common/collect/Synchronized$SynchronizedSetMultimap.entries.()Ljava/util/Collection;
+Type: Method
+Access: 1041
+Parent: com/google/common/collect/Synchronized$SynchronizedSetMultimap
+
+Name: com/google/common/collect/Synchronized$SynchronizedSetMultimap.removeAll.(Ljava/lang/Object;)Ljava/util/Collection;
+Type: Method
+Access: 1041
+Parent: com/google/common/collect/Synchronized$SynchronizedSetMultimap
+
+Name: com/google/common/collect/Synchronized$SynchronizedSetMultimap.replaceValues.(Ljava/lang/Object;Ljava/lang/Iterable;)Ljava/util/Collection;
+Type: Method
+Access: 1041
+Parent: com/google/common/collect/Synchronized$SynchronizedSetMultimap
+
+Name: com/google/common/collect/Synchronized$SynchronizedSetMultimap.get.(Ljava/lang/Object;)Ljava/util/Collection;
+Type: Method
+Access: 1041
+Parent: com/google/common/collect/Synchronized$SynchronizedSetMultimap
+
+Name: com/google/common/collect/Synchronized$SynchronizedSetMultimap.delegate.()Lcom/google/common/collect/Multimap;
+Type: Method
+Access: 1040
+Parent: com/google/common/collect/Synchronized$SynchronizedSetMultimap
+
+Name: com/google/common/collect/Synchronized$SynchronizedSetMultimap.delegate.()Ljava/lang/Object;
+Type: Method
+Access: 1040
+Parent: com/google/common/collect/Synchronized$SynchronizedSetMultimap
+
+Name: com/google/common/collect/Synchronized$SynchronizedSortedSet
+Type: Type
+Access: 20
+Parent: com/google/common/collect/Synchronized
+Super: com/google/common/collect/Synchronized$SynchronizedSet
+Interface: java/util/SortedSet
+File: lib/guava-r06/guava-r06.jar
+
+Name: com/google/common/collect/Synchronized$SynchronizedSortedSet.serialVersionUID.J
+Type: Field
+Access: 1A
+Parent: com/google/common/collect/Synchronized$SynchronizedSortedSet
+
+Name: com/google/common/collect/Synchronized$SynchronizedSortedSet.<init>.(Ljava/util/SortedSet;Ljava/lang/Object;)V
+Type: Method
+Access: 0
+Parent: com/google/common/collect/Synchronized$SynchronizedSortedSet
+
+Name: com/google/common/collect/Synchronized$SynchronizedSortedSet.delegate.()Ljava/util/SortedSet;
+Type: Method
+Access: 0
+Parent: com/google/common/collect/Synchronized$SynchronizedSortedSet
+
+Name: com/google/common/collect/Synchronized$SynchronizedSortedSet.comparator.()Ljava/util/Comparator;
+Type: Method
+Access: 1
+Parent: com/google/common/collect/Synchronized$SynchronizedSortedSet
+
+Name: com/google/common/collect/Synchronized$SynchronizedSortedSet.subSet.(Ljava/lang/Object;Ljava/lang/Object;)Ljava/util/SortedSet;
+Type: Method
+Access: 1
+Parent: com/google/common/collect/Synchronized$SynchronizedSortedSet
+
+Name: com/google/common/collect/Synchronized$SynchronizedSortedSet.headSet.(Ljava/lang/Object;)Ljava/util/SortedSet;
+Type: Method
+Access: 1
+Parent: com/google/common/collect/Synchronized$SynchronizedSortedSet
+
+Name: com/google/common/collect/Synchronized$SynchronizedSortedSet.tailSet.(Ljava/lang/Object;)Ljava/util/SortedSet;
+Type: Method
+Access: 1
+Parent: com/google/common/collect/Synchronized$SynchronizedSortedSet
+
+Name: com/google/common/collect/Synchronized$SynchronizedSortedSet.first.()Ljava/lang/Object;
+Type: Method
+Access: 1
+Parent: com/google/common/collect/Synchronized$SynchronizedSortedSet
+
+Name: com/google/common/collect/Synchronized$SynchronizedSortedSet.last.()Ljava/lang/Object;
+Type: Method
+Access: 1
+Parent: com/google/common/collect/Synchronized$SynchronizedSortedSet
+
+Name: com/google/common/collect/Synchronized$SynchronizedSortedSet.delegate.()Ljava/util/Set;
+Type: Method
+Access: 1040
+Parent: com/google/common/collect/Synchronized$SynchronizedSortedSet
+
+Name: com/google/common/collect/Synchronized$SynchronizedSortedSet.delegate.()Ljava/util/Collection;
+Type: Method
+Access: 1040
+Parent: com/google/common/collect/Synchronized$SynchronizedSortedSet
+
+Name: com/google/common/collect/Synchronized$SynchronizedSortedSet.delegate.()Ljava/lang/Object;
+Type: Method
+Access: 1040
+Parent: com/google/common/collect/Synchronized$SynchronizedSortedSet
+
+Name: com/google/common/collect/Synchronized$SynchronizedSortedSetMultimap
+Type: Type
+Access: 20
+Parent: com/google/common/collect/Synchronized
+Super: com/google/common/collect/Synchronized$SynchronizedSetMultimap
+Interface: com/google/common/collect/SortedSetMultimap
+File: lib/guava-r06/guava-r06.jar
+
+Name: com/google/common/collect/Synchronized$SynchronizedSortedSetMultimap.serialVersionUID.J
+Type: Field
+Access: 1A
+Parent: com/google/common/collect/Synchronized$SynchronizedSortedSetMultimap
+
+Name: com/google/common/collect/Synchronized$SynchronizedSortedSetMultimap.<init>.(Lcom/google/common/collect/SortedSetMultimap;Ljava/lang/Object;)V
+Type: Method
+Access: 0
+Parent: com/google/common/collect/Synchronized$SynchronizedSortedSetMultimap
+
+Name: com/google/common/collect/Synchronized$SynchronizedSortedSetMultimap.delegate.()Lcom/google/common/collect/SortedSetMultimap;
+Type: Method
+Access: 0
+Parent: com/google/common/collect/Synchronized$SynchronizedSortedSetMultimap
+
+Name: com/google/common/collect/Synchronized$SynchronizedSortedSetMultimap.get.(Ljava/lang/Object;)Ljava/util/SortedSet;
+Type: Method
+Access: 1
+Parent: com/google/common/collect/Synchronized$SynchronizedSortedSetMultimap
+
+Name: com/google/common/collect/Synchronized$SynchronizedSortedSetMultimap.removeAll.(Ljava/lang/Object;)Ljava/util/SortedSet;
+Type: Method
+Access: 1
+Parent: com/google/common/collect/Synchronized$SynchronizedSortedSetMultimap
+
+Name: com/google/common/collect/Synchronized$SynchronizedSortedSetMultimap.replaceValues.(Ljava/lang/Object;Ljava/lang/Iterable;)Ljava/util/SortedSet;
+Type: Method
+Access: 1
+Parent: com/google/common/collect/Synchronized$SynchronizedSortedSetMultimap
+
+Name: com/google/common/collect/Synchronized$SynchronizedSortedSetMultimap.valueComparator.()Ljava/util/Comparator;
+Type: Method
+Access: 1
+Parent: com/google/common/collect/Synchronized$SynchronizedSortedSetMultimap
+
+Name: com/google/common/collect/Synchronized$SynchronizedSortedSetMultimap.replaceValues.(Ljava/lang/Object;Ljava/lang/Iterable;)Ljava/util/Set;
+Type: Method
+Access: 1041
+Parent: com/google/common/collect/Synchronized$SynchronizedSortedSetMultimap
+
+Name: com/google/common/collect/Synchronized$SynchronizedSortedSetMultimap.removeAll.(Ljava/lang/Object;)Ljava/util/Set;
+Type: Method
+Access: 1041
+Parent: com/google/common/collect/Synchronized$SynchronizedSortedSetMultimap
+
+Name: com/google/common/collect/Synchronized$SynchronizedSortedSetMultimap.get.(Ljava/lang/Object;)Ljava/util/Set;
+Type: Method
+Access: 1041
+Parent: com/google/common/collect/Synchronized$SynchronizedSortedSetMultimap
+
+Name: com/google/common/collect/Synchronized$SynchronizedSortedSetMultimap.delegate.()Lcom/google/common/collect/SetMultimap;
+Type: Method
+Access: 1040
+Parent: com/google/common/collect/Synchronized$SynchronizedSortedSetMultimap
+
+Name: com/google/common/collect/Synchronized$SynchronizedSortedSetMultimap.get.(Ljava/lang/Object;)Ljava/util/Collection;
+Type: Method
+Access: 1041
+Parent: com/google/common/collect/Synchronized$SynchronizedSortedSetMultimap
+
+Name: com/google/common/collect/Synchronized$SynchronizedSortedSetMultimap.removeAll.(Ljava/lang/Object;)Ljava/util/Collection;
+Type: Method
+Access: 1041
+Parent: com/google/common/collect/Synchronized$SynchronizedSortedSetMultimap
+
+Name: com/google/common/collect/Synchronized$SynchronizedSortedSetMultimap.replaceValues.(Ljava/lang/Object;Ljava/lang/Iterable;)Ljava/util/Collection;
+Type: Method
+Access: 1041
+Parent: com/google/common/collect/Synchronized$SynchronizedSortedSetMultimap
+
+Name: com/google/common/collect/Synchronized$SynchronizedSortedSetMultimap.delegate.()Lcom/google/common/collect/Multimap;
+Type: Method
+Access: 1040
+Parent: com/google/common/collect/Synchronized$SynchronizedSortedSetMultimap
+
+Name: com/google/common/collect/Synchronized$SynchronizedSortedSetMultimap.delegate.()Ljava/lang/Object;
+Type: Method
+Access: 1040
+Parent: com/google/common/collect/Synchronized$SynchronizedSortedSetMultimap
+
+# some expression tests
+# TODO(peterhal): need more exhaustive expression tests
+TransientFields ^ com/google/common/collect/Synchronized
+com/google/common/collect/Synchronized$SynchronizedAsMap.asMapEntrySet.Ljava/util/Set;
+com/google/common/collect/Synchronized$SynchronizedAsMap.asMapValues.Ljava/util/Collection;
+com/google/common/collect/Synchronized$SynchronizedBiMap.inverse.Lcom/google/common/collect/BiMap;
+com/google/common/collect/Synchronized$SynchronizedBiMap.valueSet.Ljava/util/Set;
+com/google/common/collect/Synchronized$SynchronizedMap.entrySet.Ljava/util/Set;
+com/google/common/collect/Synchronized$SynchronizedMap.keySet.Ljava/util/Set;
+com/google/common/collect/Synchronized$SynchronizedMap.values.Ljava/util/Collection;
+com/google/common/collect/Synchronized$SynchronizedMultimap.asMap.Ljava/util/Map;
+com/google/common/collect/Synchronized$SynchronizedMultimap.entries.Ljava/util/Collection;
+com/google/common/collect/Synchronized$SynchronizedMultimap.keySet.Ljava/util/Set;
+com/google/common/collect/Synchronized$SynchronizedMultimap.keys.Lcom/google/common/collect/Multiset;
+com/google/common/collect/Synchronized$SynchronizedMultimap.valuesCollection.Ljava/util/Collection;
+com/google/common/collect/Synchronized$SynchronizedMultiset.elementSet.Ljava/util/Set;
+com/google/common/collect/Synchronized$SynchronizedMultiset.entrySet.Ljava/util/Set;
+com/google/common/collect/Synchronized$SynchronizedSetMultimap.entrySet.Ljava/util/Set;
+TS = com/google/common/collect/Synchronized ^ Types
+TS
+com/google/common/collect/Synchronized
+com/google/common/collect/Synchronized$1
+com/google/common/collect/Synchronized$SynchronizedAsMap
+com/google/common/collect/Synchronized$SynchronizedAsMapEntries
+com/google/common/collect/Synchronized$SynchronizedAsMapEntries$1
+com/google/common/collect/Synchronized$SynchronizedAsMapEntries$1$1
+com/google/common/collect/Synchronized$SynchronizedAsMapValues
+com/google/common/collect/Synchronized$SynchronizedAsMapValues$1
+com/google/common/collect/Synchronized$SynchronizedBiMap
+com/google/common/collect/Synchronized$SynchronizedCollection
+com/google/common/collect/Synchronized$SynchronizedList
+com/google/common/collect/Synchronized$SynchronizedListMultimap
+com/google/common/collect/Synchronized$SynchronizedMap
+com/google/common/collect/Synchronized$SynchronizedMultimap
+com/google/common/collect/Synchronized$SynchronizedMultiset
+com/google/common/collect/Synchronized$SynchronizedObject
+com/google/common/collect/Synchronized$SynchronizedRandomAccessList
+com/google/common/collect/Synchronized$SynchronizedSet
+com/google/common/collect/Synchronized$SynchronizedSetMultimap
+com/google/common/collect/Synchronized$SynchronizedSortedSet
+com/google/common/collect/Synchronized$SynchronizedSortedSetMultimap
+TS ^ Finals
+com/google/common/collect/Synchronized
+Synchronized = TS ^ Finals
+!Synchronized
+com/google/common/collect/Synchronized$1
+com/google/common/collect/Synchronized$SynchronizedAsMap
+com/google/common/collect/Synchronized$SynchronizedAsMapEntries
+com/google/common/collect/Synchronized$SynchronizedAsMapValues
+com/google/common/collect/Synchronized$SynchronizedBiMap
+com/google/common/collect/Synchronized$SynchronizedCollection
+com/google/common/collect/Synchronized$SynchronizedList
+com/google/common/collect/Synchronized$SynchronizedListMultimap
+com/google/common/collect/Synchronized$SynchronizedMap
+com/google/common/collect/Synchronized$SynchronizedMultimap
+com/google/common/collect/Synchronized$SynchronizedMultiset
+com/google/common/collect/Synchronized$SynchronizedObject
+com/google/common/collect/Synchronized$SynchronizedRandomAccessList
+com/google/common/collect/Synchronized$SynchronizedSet
+com/google/common/collect/Synchronized$SynchronizedSetMultimap
+com/google/common/collect/Synchronized$SynchronizedSortedSet
+com/google/common/collect/Synchronized$SynchronizedSortedSetMultimap
+com/google/common/collect/Synchronized.<init>.()V
+com/google/common/collect/Synchronized.access$200.(Ljava/util/SortedSet;Ljava/lang/Object;)Ljava/util/SortedSet;
+com/google/common/collect/Synchronized.access$300.(Ljava/util/List;Ljava/lang/Object;)Ljava/util/List;
+com/google/common/collect/Synchronized.access$400.(Ljava/util/Set;Ljava/lang/Object;)Ljava/util/Set;
+com/google/common/collect/Synchronized.access$500.(Ljava/util/Collection;Ljava/lang/Object;)Ljava/util/Collection;
+com/google/common/collect/Synchronized.access$600.(Ljava/util/Collection;Ljava/lang/Object;)Ljava/util/Collection;
+com/google/common/collect/Synchronized.biMap.(Lcom/google/common/collect/BiMap;Ljava/lang/Object;)Lcom/google/common/collect/BiMap;
+com/google/common/collect/Synchronized.collection.(Ljava/util/Collection;Ljava/lang/Object;)Ljava/util/Collection;
+com/google/common/collect/Synchronized.list.(Ljava/util/List;Ljava/lang/Object;)Ljava/util/List;
+com/google/common/collect/Synchronized.listMultimap.(Lcom/google/common/collect/ListMultimap;Ljava/lang/Object;)Lcom/google/common/collect/ListMultimap;
+com/google/common/collect/Synchronized.map.(Ljava/util/Map;Ljava/lang/Object;)Ljava/util/Map;
+com/google/common/collect/Synchronized.multimap.(Lcom/google/common/collect/Multimap;Ljava/lang/Object;)Lcom/google/common/collect/Multimap;
+com/google/common/collect/Synchronized.multiset.(Lcom/google/common/collect/Multiset;Ljava/lang/Object;)Lcom/google/common/collect/Multiset;
+com/google/common/collect/Synchronized.set.(Ljava/util/Set;Ljava/lang/Object;)Ljava/util/Set;
+com/google/common/collect/Synchronized.setMultimap.(Lcom/google/common/collect/SetMultimap;Ljava/lang/Object;)Lcom/google/common/collect/SetMultimap;
+com/google/common/collect/Synchronized.sortedSet.(Ljava/util/SortedSet;Ljava/lang/Object;)Ljava/util/SortedSet;
+com/google/common/collect/Synchronized.sortedSetMultimap.(Lcom/google/common/collect/SortedSetMultimap;Ljava/lang/Object;)Lcom/google/common/collect/SortedSetMultimap;
+com/google/common/collect/Synchronized.typePreservingCollection.(Ljava/util/Collection;Ljava/lang/Object;)Ljava/util/Collection;
+com/google/common/collect/Synchronized.typePreservingSet.(Ljava/util/Set;Ljava/lang/Object;)Ljava/util/Set;
+size !*Synchronized
+268
+size (Synchronized + !Synchronized + !!Synchronized + !!!Synchronized + !!!!Synchronized)
+268
+size !Synchronized
+36
+!!!!Synchronized
+com/google/common/collect/Synchronized$SynchronizedAsMapEntries$1$1.<init>.(Lcom/google/common/collect/Synchronized$SynchronizedAsMapEntries$1;Ljava/util/Map$Entry;)V
+com/google/common/collect/Synchronized$SynchronizedAsMapEntries$1$1.delegate.()Ljava/lang/Object;
+com/google/common/collect/Synchronized$SynchronizedAsMapEntries$1$1.delegate.()Ljava/util/Map$Entry;
+com/google/common/collect/Synchronized$SynchronizedAsMapEntries$1$1.getValue.()Ljava/lang/Object;
+com/google/common/collect/Synchronized$SynchronizedAsMapEntries$1$1.getValue.()Ljava/util/Collection;
+com/google/common/collect/Synchronized$SynchronizedAsMapEntries$1$1.this$1.Lcom/google/common/collect/Synchronized$SynchronizedAsMapEntries$1;
+com/google/common/collect/Synchronized$SynchronizedAsMapEntries$1$1.val$entry.Ljava/util/Map$Entry;
+
+<com/google/common/collect/Synchronized$SynchronizedAsMapEntries$1$1.<init>.(Lcom/google/common/collect/Synchronized$SynchronizedAsMapEntries$1;Ljava/util/Map$Entry;)V
+com/google/common/collect/ForwardingMapEntry.<init>.()V
+com/google/common/collect/Synchronized$SynchronizedAsMapEntries$1
+com/google/common/collect/Synchronized$SynchronizedAsMapEntries$1$1
+com/google/common/collect/Synchronized$SynchronizedAsMapEntries$1$1.this$1.Lcom/google/common/collect/Synchronized$SynchronizedAsMapEntries$1;
+com/google/common/collect/Synchronized$SynchronizedAsMapEntries$1$1.val$entry.Ljava/util/Map$Entry;
+java/util/Map$Entry
+>com/google/common/collect/Synchronized$SynchronizedAsMapEntries$1$1.<init>.(Lcom/google/common/collect/Synchronized$SynchronizedAsMapEntries$1;Ljava/util/Map$Entry;)V
+com/google/common/collect/Synchronized$SynchronizedAsMapEntries$1.next.()Ljava/util/Map$Entry;
+size >* com/google/common/collect/Synchronized$SynchronizedAsMapEntries$1$1.<init>.(Lcom/google/common/collect/Synchronized$SynchronizedAsMapEntries$1;Ljava/util/Map$Entry;)V
+3
+size > com/google/common/collect/Synchronized$SynchronizedAsMapEntries$1$1.<init>.(Lcom/google/common/collect/Synchronized$SynchronizedAsMapEntries$1;Ljava/util/Map$Entry;)V
+1
+>* com/google/common/collect/Synchronized$SynchronizedAsMapEntries$1$1.<init>.(Lcom/google/common/collect/Synchronized$SynchronizedAsMapEntries$1;Ljava/util/Map$Entry;)V
+com/google/common/collect/Synchronized$SynchronizedAsMapEntries$1$1.<init>.(Lcom/google/common/collect/Synchronized$SynchronizedAsMapEntries$1;Ljava/util/Map$Entry;)V
+com/google/common/collect/Synchronized$SynchronizedAsMapEntries$1.next.()Ljava/lang/Object;
+com/google/common/collect/Synchronized$SynchronizedAsMapEntries$1.next.()Ljava/util/Map$Entry;
+> com/google/common/collect/Synchronized$SynchronizedAsMapEntries$1$1.<init>.(Lcom/google/common/collect/Synchronized$SynchronizedAsMapEntries$1;Ljava/util/Map$Entry;)V
+com/google/common/collect/Synchronized$SynchronizedAsMapEntries$1.next.()Ljava/util/Map$Entry;
+< com/google/common/collect/Synchronized$SynchronizedAsMapEntries$1$1.<init>.(Lcom/google/common/collect/Synchronized$SynchronizedAsMapEntries$1;Ljava/util/Map$Entry;)V
+com/google/common/collect/ForwardingMapEntry.<init>.()V
+com/google/common/collect/Synchronized$SynchronizedAsMapEntries$1
+com/google/common/collect/Synchronized$SynchronizedAsMapEntries$1$1
+com/google/common/collect/Synchronized$SynchronizedAsMapEntries$1$1.this$1.Lcom/google/common/collect/Synchronized$SynchronizedAsMapEntries$1;
+com/google/common/collect/Synchronized$SynchronizedAsMapEntries$1$1.val$entry.Ljava/util/Map$Entry;
+java/util/Map$Entry
+size <* com/google/common/collect/Synchronized$SynchronizedAsMapEntries$1$1.<init>.(Lcom/google/common/collect/Synchronized$SynchronizedAsMapEntries$1;Ljava/util/Map$Entry;)V
+22
+
+# writeList and readList
+writeList out/list.txt !!Synchronized
+readList out/list.txt ReadList
+com/google/common/collect/Synchronized$SynchronizedAsMap.<init>.(Ljava/util/Map;Ljava/lang/Object;)V
+com/google/common/collect/Synchronized$SynchronizedAsMap.asMapEntrySet.Ljava/util/Set;
+com/google/common/collect/Synchronized$SynchronizedAsMap.asMapValues.Ljava/util/Collection;
+com/google/common/collect/Synchronized$SynchronizedAsMap.containsValue.(Ljava/lang/Object;)Z
+com/google/common/collect/Synchronized$SynchronizedAsMap.entrySet.()Ljava/util/Set;
+com/google/common/collect/Synchronized$SynchronizedAsMap.get.(Ljava/lang/Object;)Ljava/lang/Object;
+com/google/common/collect/Synchronized$SynchronizedAsMap.get.(Ljava/lang/Object;)Ljava/util/Collection;
+com/google/common/collect/Synchronized$SynchronizedAsMap.serialVersionUID.J
+com/google/common/collect/Synchronized$SynchronizedAsMap.values.()Ljava/util/Collection;
+com/google/common/collect/Synchronized$SynchronizedAsMapEntries$1
+com/google/common/collect/Synchronized$SynchronizedAsMapEntries.<init>.(Ljava/util/Set;Ljava/lang/Object;)V
+com/google/common/collect/Synchronized$SynchronizedAsMapEntries.contains.(Ljava/lang/Object;)Z
+com/google/common/collect/Synchronized$SynchronizedAsMapEntries.containsAll.(Ljava/util/Collection;)Z
+com/google/common/collect/Synchronized$SynchronizedAsMapEntries.equals.(Ljava/lang/Object;)Z
+com/google/common/collect/Synchronized$SynchronizedAsMapEntries.iterator.()Ljava/util/Iterator;
+com/google/common/collect/Synchronized$SynchronizedAsMapEntries.remove.(Ljava/lang/Object;)Z
+com/google/common/collect/Synchronized$SynchronizedAsMapEntries.removeAll.(Ljava/util/Collection;)Z
+com/google/common/collect/Synchronized$SynchronizedAsMapEntries.retainAll.(Ljava/util/Collection;)Z
+com/google/common/collect/Synchronized$SynchronizedAsMapEntries.serialVersionUID.J
+com/google/common/collect/Synchronized$SynchronizedAsMapEntries.toArray.()[Ljava/lang/Object;
+com/google/common/collect/Synchronized$SynchronizedAsMapEntries.toArray.([Ljava/lang/Object;)[Ljava/lang/Object;
+com/google/common/collect/Synchronized$SynchronizedAsMapValues$1
+com/google/common/collect/Synchronized$SynchronizedAsMapValues.<init>.(Ljava/util/Collection;Ljava/lang/Object;)V
+com/google/common/collect/Synchronized$SynchronizedAsMapValues.iterator.()Ljava/util/Iterator;
+com/google/common/collect/Synchronized$SynchronizedAsMapValues.serialVersionUID.J
+com/google/common/collect/Synchronized$SynchronizedBiMap.<init>.(Lcom/google/common/collect/BiMap;Ljava/lang/Object;Lcom/google/common/collect/BiMap;)V
+com/google/common/collect/Synchronized$SynchronizedBiMap.<init>.(Lcom/google/common/collect/BiMap;Ljava/lang/Object;Lcom/google/common/collect/BiMap;Lcom/google/common/collect/Synchronized$1;)V
+com/google/common/collect/Synchronized$SynchronizedBiMap.delegate.()Lcom/google/common/collect/BiMap;
+com/google/common/collect/Synchronized$SynchronizedBiMap.delegate.()Ljava/lang/Object;
+com/google/common/collect/Synchronized$SynchronizedBiMap.delegate.()Ljava/util/Map;
+com/google/common/collect/Synchronized$SynchronizedBiMap.forcePut.(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
+com/google/common/collect/Synchronized$SynchronizedBiMap.inverse.()Lcom/google/common/collect/BiMap;
+com/google/common/collect/Synchronized$SynchronizedBiMap.inverse.Lcom/google/common/collect/BiMap;
+com/google/common/collect/Synchronized$SynchronizedBiMap.serialVersionUID.J
+com/google/common/collect/Synchronized$SynchronizedBiMap.valueSet.Ljava/util/Set;
+com/google/common/collect/Synchronized$SynchronizedBiMap.values.()Ljava/util/Collection;
+com/google/common/collect/Synchronized$SynchronizedBiMap.values.()Ljava/util/Set;
+com/google/common/collect/Synchronized$SynchronizedCollection.<init>.(Ljava/util/Collection;Ljava/lang/Object;)V
+com/google/common/collect/Synchronized$SynchronizedCollection.<init>.(Ljava/util/Collection;Ljava/lang/Object;Lcom/google/common/collect/Synchronized$1;)V
+com/google/common/collect/Synchronized$SynchronizedCollection.add.(Ljava/lang/Object;)Z
+com/google/common/collect/Synchronized$SynchronizedCollection.addAll.(Ljava/util/Collection;)Z
+com/google/common/collect/Synchronized$SynchronizedCollection.clear.()V
+com/google/common/collect/Synchronized$SynchronizedCollection.contains.(Ljava/lang/Object;)Z
+com/google/common/collect/Synchronized$SynchronizedCollection.containsAll.(Ljava/util/Collection;)Z
+com/google/common/collect/Synchronized$SynchronizedCollection.delegate.()Ljava/lang/Object;
+com/google/common/collect/Synchronized$SynchronizedCollection.delegate.()Ljava/util/Collection;
+com/google/common/collect/Synchronized$SynchronizedCollection.isEmpty.()Z
+com/google/common/collect/Synchronized$SynchronizedCollection.iterator.()Ljava/util/Iterator;
+com/google/common/collect/Synchronized$SynchronizedCollection.remove.(Ljava/lang/Object;)Z
+com/google/common/collect/Synchronized$SynchronizedCollection.removeAll.(Ljava/util/Collection;)Z
+com/google/common/collect/Synchronized$SynchronizedCollection.retainAll.(Ljava/util/Collection;)Z
+com/google/common/collect/Synchronized$SynchronizedCollection.serialVersionUID.J
+com/google/common/collect/Synchronized$SynchronizedCollection.size.()I
+com/google/common/collect/Synchronized$SynchronizedCollection.toArray.()[Ljava/lang/Object;
+com/google/common/collect/Synchronized$SynchronizedCollection.toArray.([Ljava/lang/Object;)[Ljava/lang/Object;
+com/google/common/collect/Synchronized$SynchronizedList.<init>.(Ljava/util/List;Ljava/lang/Object;)V
+com/google/common/collect/Synchronized$SynchronizedList.add.(ILjava/lang/Object;)V
+com/google/common/collect/Synchronized$SynchronizedList.addAll.(ILjava/util/Collection;)Z
+com/google/common/collect/Synchronized$SynchronizedList.delegate.()Ljava/lang/Object;
+com/google/common/collect/Synchronized$SynchronizedList.delegate.()Ljava/util/Collection;
+com/google/common/collect/Synchronized$SynchronizedList.delegate.()Ljava/util/List;
+com/google/common/collect/Synchronized$SynchronizedList.equals.(Ljava/lang/Object;)Z
+com/google/common/collect/Synchronized$SynchronizedList.get.(I)Ljava/lang/Object;
+com/google/common/collect/Synchronized$SynchronizedList.hashCode.()I
+com/google/common/collect/Synchronized$SynchronizedList.indexOf.(Ljava/lang/Object;)I
+com/google/common/collect/Synchronized$SynchronizedList.lastIndexOf.(Ljava/lang/Object;)I
+com/google/common/collect/Synchronized$SynchronizedList.listIterator.()Ljava/util/ListIterator;
+com/google/common/collect/Synchronized$SynchronizedList.listIterator.(I)Ljava/util/ListIterator;
+com/google/common/collect/Synchronized$SynchronizedList.remove.(I)Ljava/lang/Object;
+com/google/common/collect/Synchronized$SynchronizedList.serialVersionUID.J
+com/google/common/collect/Synchronized$SynchronizedList.set.(ILjava/lang/Object;)Ljava/lang/Object;
+com/google/common/collect/Synchronized$SynchronizedList.subList.(II)Ljava/util/List;
+com/google/common/collect/Synchronized$SynchronizedListMultimap.<init>.(Lcom/google/common/collect/ListMultimap;Ljava/lang/Object;)V
+com/google/common/collect/Synchronized$SynchronizedListMultimap.delegate.()Lcom/google/common/collect/ListMultimap;
+com/google/common/collect/Synchronized$SynchronizedListMultimap.delegate.()Lcom/google/common/collect/Multimap;
+com/google/common/collect/Synchronized$SynchronizedListMultimap.delegate.()Ljava/lang/Object;
+com/google/common/collect/Synchronized$SynchronizedListMultimap.get.(Ljava/lang/Object;)Ljava/util/Collection;
+com/google/common/collect/Synchronized$SynchronizedListMultimap.get.(Ljava/lang/Object;)Ljava/util/List;
+com/google/common/collect/Synchronized$SynchronizedListMultimap.removeAll.(Ljava/lang/Object;)Ljava/util/Collection;
+com/google/common/collect/Synchronized$SynchronizedListMultimap.removeAll.(Ljava/lang/Object;)Ljava/util/List;
+com/google/common/collect/Synchronized$SynchronizedListMultimap.replaceValues.(Ljava/lang/Object;Ljava/lang/Iterable;)Ljava/util/Collection;
+com/google/common/collect/Synchronized$SynchronizedListMultimap.replaceValues.(Ljava/lang/Object;Ljava/lang/Iterable;)Ljava/util/List;
+com/google/common/collect/Synchronized$SynchronizedListMultimap.serialVersionUID.J
+com/google/common/collect/Synchronized$SynchronizedMap.<init>.(Ljava/util/Map;Ljava/lang/Object;)V
+com/google/common/collect/Synchronized$SynchronizedMap.<init>.(Ljava/util/Map;Ljava/lang/Object;Lcom/google/common/collect/Synchronized$1;)V
+com/google/common/collect/Synchronized$SynchronizedMap.clear.()V
+com/google/common/collect/Synchronized$SynchronizedMap.containsKey.(Ljava/lang/Object;)Z
+com/google/common/collect/Synchronized$SynchronizedMap.containsValue.(Ljava/lang/Object;)Z
+com/google/common/collect/Synchronized$SynchronizedMap.delegate.()Ljava/lang/Object;
+com/google/common/collect/Synchronized$SynchronizedMap.delegate.()Ljava/util/Map;
+com/google/common/collect/Synchronized$SynchronizedMap.entrySet.()Ljava/util/Set;
+com/google/common/collect/Synchronized$SynchronizedMap.entrySet.Ljava/util/Set;
+com/google/common/collect/Synchronized$SynchronizedMap.equals.(Ljava/lang/Object;)Z
+com/google/common/collect/Synchronized$SynchronizedMap.get.(Ljava/lang/Object;)Ljava/lang/Object;
+com/google/common/collect/Synchronized$SynchronizedMap.hashCode.()I
+com/google/common/collect/Synchronized$SynchronizedMap.isEmpty.()Z
+com/google/common/collect/Synchronized$SynchronizedMap.keySet.()Ljava/util/Set;
+com/google/common/collect/Synchronized$SynchronizedMap.keySet.Ljava/util/Set;
+com/google/common/collect/Synchronized$SynchronizedMap.put.(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
+com/google/common/collect/Synchronized$SynchronizedMap.putAll.(Ljava/util/Map;)V
+com/google/common/collect/Synchronized$SynchronizedMap.remove.(Ljava/lang/Object;)Ljava/lang/Object;
+com/google/common/collect/Synchronized$SynchronizedMap.serialVersionUID.J
+com/google/common/collect/Synchronized$SynchronizedMap.size.()I
+com/google/common/collect/Synchronized$SynchronizedMap.values.()Ljava/util/Collection;
+com/google/common/collect/Synchronized$SynchronizedMap.values.Ljava/util/Collection;
+com/google/common/collect/Synchronized$SynchronizedMultimap.<init>.(Lcom/google/common/collect/Multimap;Ljava/lang/Object;)V
+com/google/common/collect/Synchronized$SynchronizedMultimap.asMap.()Ljava/util/Map;
+com/google/common/collect/Synchronized$SynchronizedMultimap.asMap.Ljava/util/Map;
+com/google/common/collect/Synchronized$SynchronizedMultimap.clear.()V
+com/google/common/collect/Synchronized$SynchronizedMultimap.containsEntry.(Ljava/lang/Object;Ljava/lang/Object;)Z
+com/google/common/collect/Synchronized$SynchronizedMultimap.containsKey.(Ljava/lang/Object;)Z
+com/google/common/collect/Synchronized$SynchronizedMultimap.containsValue.(Ljava/lang/Object;)Z
+com/google/common/collect/Synchronized$SynchronizedMultimap.delegate.()Lcom/google/common/collect/Multimap;
+com/google/common/collect/Synchronized$SynchronizedMultimap.delegate.()Ljava/lang/Object;
+com/google/common/collect/Synchronized$SynchronizedMultimap.entries.()Ljava/util/Collection;
+com/google/common/collect/Synchronized$SynchronizedMultimap.entries.Ljava/util/Collection;
+com/google/common/collect/Synchronized$SynchronizedMultimap.equals.(Ljava/lang/Object;)Z
+com/google/common/collect/Synchronized$SynchronizedMultimap.get.(Ljava/lang/Object;)Ljava/util/Collection;
+com/google/common/collect/Synchronized$SynchronizedMultimap.hashCode.()I
+com/google/common/collect/Synchronized$SynchronizedMultimap.isEmpty.()Z
+com/google/common/collect/Synchronized$SynchronizedMultimap.keySet.()Ljava/util/Set;
+com/google/common/collect/Synchronized$SynchronizedMultimap.keySet.Ljava/util/Set;
+com/google/common/collect/Synchronized$SynchronizedMultimap.keys.()Lcom/google/common/collect/Multiset;
+com/google/common/collect/Synchronized$SynchronizedMultimap.keys.Lcom/google/common/collect/Multiset;
+com/google/common/collect/Synchronized$SynchronizedMultimap.put.(Ljava/lang/Object;Ljava/lang/Object;)Z
+com/google/common/collect/Synchronized$SynchronizedMultimap.putAll.(Lcom/google/common/collect/Multimap;)Z
+com/google/common/collect/Synchronized$SynchronizedMultimap.putAll.(Ljava/lang/Object;Ljava/lang/Iterable;)Z
+com/google/common/collect/Synchronized$SynchronizedMultimap.remove.(Ljava/lang/Object;Ljava/lang/Object;)Z
+com/google/common/collect/Synchronized$SynchronizedMultimap.removeAll.(Ljava/lang/Object;)Ljava/util/Collection;
+com/google/common/collect/Synchronized$SynchronizedMultimap.replaceValues.(Ljava/lang/Object;Ljava/lang/Iterable;)Ljava/util/Collection;
+com/google/common/collect/Synchronized$SynchronizedMultimap.serialVersionUID.J
+com/google/common/collect/Synchronized$SynchronizedMultimap.size.()I
+com/google/common/collect/Synchronized$SynchronizedMultimap.values.()Ljava/util/Collection;
+com/google/common/collect/Synchronized$SynchronizedMultimap.valuesCollection.Ljava/util/Collection;
+com/google/common/collect/Synchronized$SynchronizedMultiset.<init>.(Lcom/google/common/collect/Multiset;Ljava/lang/Object;)V
+com/google/common/collect/Synchronized$SynchronizedMultiset.add.(Ljava/lang/Object;I)I
+com/google/common/collect/Synchronized$SynchronizedMultiset.count.(Ljava/lang/Object;)I
+com/google/common/collect/Synchronized$SynchronizedMultiset.delegate.()Lcom/google/common/collect/Multiset;
+com/google/common/collect/Synchronized$SynchronizedMultiset.delegate.()Ljava/lang/Object;
+com/google/common/collect/Synchronized$SynchronizedMultiset.delegate.()Ljava/util/Collection;
+com/google/common/collect/Synchronized$SynchronizedMultiset.elementSet.()Ljava/util/Set;
+com/google/common/collect/Synchronized$SynchronizedMultiset.elementSet.Ljava/util/Set;
+com/google/common/collect/Synchronized$SynchronizedMultiset.entrySet.()Ljava/util/Set;
+com/google/common/collect/Synchronized$SynchronizedMultiset.entrySet.Ljava/util/Set;
+com/google/common/collect/Synchronized$SynchronizedMultiset.equals.(Ljava/lang/Object;)Z
+com/google/common/collect/Synchronized$SynchronizedMultiset.hashCode.()I
+com/google/common/collect/Synchronized$SynchronizedMultiset.remove.(Ljava/lang/Object;I)I
+com/google/common/collect/Synchronized$SynchronizedMultiset.serialVersionUID.J
+com/google/common/collect/Synchronized$SynchronizedMultiset.setCount.(Ljava/lang/Object;I)I
+com/google/common/collect/Synchronized$SynchronizedMultiset.setCount.(Ljava/lang/Object;II)Z
+com/google/common/collect/Synchronized$SynchronizedObject.<init>.(Ljava/lang/Object;Ljava/lang/Object;)V
+com/google/common/collect/Synchronized$SynchronizedObject.delegate.()Ljava/lang/Object;
+com/google/common/collect/Synchronized$SynchronizedObject.delegate.Ljava/lang/Object;
+com/google/common/collect/Synchronized$SynchronizedObject.mutex.Ljava/lang/Object;
+com/google/common/collect/Synchronized$SynchronizedObject.serialVersionUID.J
+com/google/common/collect/Synchronized$SynchronizedObject.toString.()Ljava/lang/String;
+com/google/common/collect/Synchronized$SynchronizedObject.writeObject.(Ljava/io/ObjectOutputStream;)V
+com/google/common/collect/Synchronized$SynchronizedRandomAccessList.<init>.(Ljava/util/List;Ljava/lang/Object;)V
+com/google/common/collect/Synchronized$SynchronizedRandomAccessList.serialVersionUID.J
+com/google/common/collect/Synchronized$SynchronizedSet.<init>.(Ljava/util/Set;Ljava/lang/Object;)V
+com/google/common/collect/Synchronized$SynchronizedSet.<init>.(Ljava/util/Set;Ljava/lang/Object;Lcom/google/common/collect/Synchronized$1;)V
+com/google/common/collect/Synchronized$SynchronizedSet.delegate.()Ljava/lang/Object;
+com/google/common/collect/Synchronized$SynchronizedSet.delegate.()Ljava/util/Collection;
+com/google/common/collect/Synchronized$SynchronizedSet.delegate.()Ljava/util/Set;
+com/google/common/collect/Synchronized$SynchronizedSet.equals.(Ljava/lang/Object;)Z
+com/google/common/collect/Synchronized$SynchronizedSet.hashCode.()I
+com/google/common/collect/Synchronized$SynchronizedSet.serialVersionUID.J
+com/google/common/collect/Synchronized$SynchronizedSetMultimap.<init>.(Lcom/google/common/collect/SetMultimap;Ljava/lang/Object;)V
+com/google/common/collect/Synchronized$SynchronizedSetMultimap.delegate.()Lcom/google/common/collect/Multimap;
+com/google/common/collect/Synchronized$SynchronizedSetMultimap.delegate.()Lcom/google/common/collect/SetMultimap;
+com/google/common/collect/Synchronized$SynchronizedSetMultimap.delegate.()Ljava/lang/Object;
+com/google/common/collect/Synchronized$SynchronizedSetMultimap.entries.()Ljava/util/Collection;
+com/google/common/collect/Synchronized$SynchronizedSetMultimap.entries.()Ljava/util/Set;
+com/google/common/collect/Synchronized$SynchronizedSetMultimap.entrySet.Ljava/util/Set;
+com/google/common/collect/Synchronized$SynchronizedSetMultimap.get.(Ljava/lang/Object;)Ljava/util/Collection;
+com/google/common/collect/Synchronized$SynchronizedSetMultimap.get.(Ljava/lang/Object;)Ljava/util/Set;
+com/google/common/collect/Synchronized$SynchronizedSetMultimap.removeAll.(Ljava/lang/Object;)Ljava/util/Collection;
+com/google/common/collect/Synchronized$SynchronizedSetMultimap.removeAll.(Ljava/lang/Object;)Ljava/util/Set;
+com/google/common/collect/Synchronized$SynchronizedSetMultimap.replaceValues.(Ljava/lang/Object;Ljava/lang/Iterable;)Ljava/util/Collection;
+com/google/common/collect/Synchronized$SynchronizedSetMultimap.replaceValues.(Ljava/lang/Object;Ljava/lang/Iterable;)Ljava/util/Set;
+com/google/common/collect/Synchronized$SynchronizedSetMultimap.serialVersionUID.J
+com/google/common/collect/Synchronized$SynchronizedSortedSet.<init>.(Ljava/util/SortedSet;Ljava/lang/Object;)V
+com/google/common/collect/Synchronized$SynchronizedSortedSet.comparator.()Ljava/util/Comparator;
+com/google/common/collect/Synchronized$SynchronizedSortedSet.delegate.()Ljava/lang/Object;
+com/google/common/collect/Synchronized$SynchronizedSortedSet.delegate.()Ljava/util/Collection;
+com/google/common/collect/Synchronized$SynchronizedSortedSet.delegate.()Ljava/util/Set;
+com/google/common/collect/Synchronized$SynchronizedSortedSet.delegate.()Ljava/util/SortedSet;
+com/google/common/collect/Synchronized$SynchronizedSortedSet.first.()Ljava/lang/Object;
+com/google/common/collect/Synchronized$SynchronizedSortedSet.headSet.(Ljava/lang/Object;)Ljava/util/SortedSet;
+com/google/common/collect/Synchronized$SynchronizedSortedSet.last.()Ljava/lang/Object;
+com/google/common/collect/Synchronized$SynchronizedSortedSet.serialVersionUID.J
+com/google/common/collect/Synchronized$SynchronizedSortedSet.subSet.(Ljava/lang/Object;Ljava/lang/Object;)Ljava/util/SortedSet;
+com/google/common/collect/Synchronized$SynchronizedSortedSet.tailSet.(Ljava/lang/Object;)Ljava/util/SortedSet;
+com/google/common/collect/Synchronized$SynchronizedSortedSetMultimap.<init>.(Lcom/google/common/collect/SortedSetMultimap;Ljava/lang/Object;)V
+com/google/common/collect/Synchronized$SynchronizedSortedSetMultimap.delegate.()Lcom/google/common/collect/Multimap;
+com/google/common/collect/Synchronized$SynchronizedSortedSetMultimap.delegate.()Lcom/google/common/collect/SetMultimap;
+com/google/common/collect/Synchronized$SynchronizedSortedSetMultimap.delegate.()Lcom/google/common/collect/SortedSetMultimap;
+com/google/common/collect/Synchronized$SynchronizedSortedSetMultimap.delegate.()Ljava/lang/Object;
+com/google/common/collect/Synchronized$SynchronizedSortedSetMultimap.get.(Ljava/lang/Object;)Ljava/util/Collection;
+com/google/common/collect/Synchronized$SynchronizedSortedSetMultimap.get.(Ljava/lang/Object;)Ljava/util/Set;
+com/google/common/collect/Synchronized$SynchronizedSortedSetMultimap.get.(Ljava/lang/Object;)Ljava/util/SortedSet;
+com/google/common/collect/Synchronized$SynchronizedSortedSetMultimap.removeAll.(Ljava/lang/Object;)Ljava/util/Collection;
+com/google/common/collect/Synchronized$SynchronizedSortedSetMultimap.removeAll.(Ljava/lang/Object;)Ljava/util/Set;
+com/google/common/collect/Synchronized$SynchronizedSortedSetMultimap.removeAll.(Ljava/lang/Object;)Ljava/util/SortedSet;
+com/google/common/collect/Synchronized$SynchronizedSortedSetMultimap.replaceValues.(Ljava/lang/Object;Ljava/lang/Iterable;)Ljava/util/Collection;
+com/google/common/collect/Synchronized$SynchronizedSortedSetMultimap.replaceValues.(Ljava/lang/Object;Ljava/lang/Iterable;)Ljava/util/Set;
+com/google/common/collect/Synchronized$SynchronizedSortedSetMultimap.replaceValues.(Ljava/lang/Object;Ljava/lang/Iterable;)Ljava/util/SortedSet;
+com/google/common/collect/Synchronized$SynchronizedSortedSetMultimap.serialVersionUID.J
+com/google/common/collect/Synchronized$SynchronizedSortedSetMultimap.valueComparator.()Ljava/util/Comparator;
+size ReadList
+209
+size ReadList - !!Synchronized
+0
+
+# display command history
+history
+# Script to test basic codecleaver operations
+#
+# TODO(peterhal): need more exhaustive tests
+
+# display help topics
+help
+
+# display help for a command
+help list
+
+# display help for an aliased operator
+help +
+
+# display complete help docs
+help all
+
+# open a jar file and assign it to the Guava variable
+openAssign Guava lib/guava-r06/guava-r06.jar
+
+# the special list operations
+listSets
+listOpenFiles
+listSymbolFiles
+
+# simple list
+list TransientFields
+
+# the info command
+info com/google/common/collect/Synchronized
+
+# some expression tests
+# TODO(peterhal): need more exhaustive expression tests
+TransientFields ^ com/google/common/collect/Synchronized
+TS = com/google/common/collect/Synchronized ^ Types
+TS
+TS ^ Finals
+Synchronized = TS ^ Finals
+!Synchronized
+size !*Synchronized
+size (Synchronized + !Synchronized + !!Synchronized + !!!Synchronized + !!!!Synchronized)
+size !Synchronized
+!!!!Synchronized
+
+<com/google/common/collect/Synchronized$SynchronizedAsMapEntries$1$1.<init>.(Lcom/google/common/collect/Synchronized$SynchronizedAsMapEntries$1;Ljava/util/Map$Entry;)V
+>com/google/common/collect/Synchronized$SynchronizedAsMapEntries$1$1.<init>.(Lcom/google/common/collect/Synchronized$SynchronizedAsMapEntries$1;Ljava/util/Map$Entry;)V
+size >* com/google/common/collect/Synchronized$SynchronizedAsMapEntries$1$1.<init>.(Lcom/google/common/collect/Synchronized$SynchronizedAsMapEntries$1;Ljava/util/Map$Entry;)V
+size > com/google/common/collect/Synchronized$SynchronizedAsMapEntries$1$1.<init>.(Lcom/google/common/collect/Synchronized$SynchronizedAsMapEntries$1;Ljava/util/Map$Entry;)V
+>* com/google/common/collect/Synchronized$SynchronizedAsMapEntries$1$1.<init>.(Lcom/google/common/collect/Synchronized$SynchronizedAsMapEntries$1;Ljava/util/Map$Entry;)V
+> com/google/common/collect/Synchronized$SynchronizedAsMapEntries$1$1.<init>.(Lcom/google/common/collect/Synchronized$SynchronizedAsMapEntries$1;Ljava/util/Map$Entry;)V
+< com/google/common/collect/Synchronized$SynchronizedAsMapEntries$1$1.<init>.(Lcom/google/common/collect/Synchronized$SynchronizedAsMapEntries$1;Ljava/util/Map$Entry;)V
+size <* com/google/common/collect/Synchronized$SynchronizedAsMapEntries$1$1.<init>.(Lcom/google/common/collect/Synchronized$SynchronizedAsMapEntries$1;Ljava/util/Map$Entry;)V
+
+# writeList and readList
+writeList out/list.txt !!Synchronized
+readList out/list.txt ReadList
+size ReadList
+size ReadList - !!Synchronized
+
+# display command history
+history
+
+# write results
+writeOutput out/actual-results.txt
